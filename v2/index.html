@@ -1,0 +1,649 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101319">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="A private sanctuary for holding your streak. No account. Nothing leaves your device.">
+  <title>Sovereign</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23101319'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%23272a30' stroke-width='2'/%3E%3Cpath d='M16 7a9 9 0 0 1 8.6 11.7' fill='none' stroke='%23e2c399' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="preload" href="fonts/plus-jakarta-sans.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/eb-garamond.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/symbols.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="styles.css?v=1">
+</head>
+<body>
+  <header class="bar">
+    <div class="bar-in">
+      <div class="bar-brand">
+        <a class="wordmark" href="#present">Sovereign</a>
+        <span class="chip chip-day" id="dayChip" hidden></span>
+      </div>
+      <button class="avatar" id="openSettings" type="button" aria-label="Settings" aria-haspopup="dialog" hidden>
+        <span class="ms" aria-hidden="true">person</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ───────────── First visit ───────────── -->
+  <main class="setup" id="setup" hidden>
+    <span class="label-sm gold wide">A private sanctuary</span>
+    <h1 class="setup-title">Begin the count.</h1>
+    <p class="setup-lede">A quiet record of how long you have held. No account. Nothing leaves this device.</p>
+    <div class="setup-actions">
+      <button class="btn primary" id="startNow" type="button">Begin from now</button>
+      <button class="btn secondary" id="carryOver" type="button" hidden></button>
+      <button class="btn secondary" id="startEarlier" type="button" aria-expanded="false" aria-controls="earlierForm">It began earlier</button>
+      <form class="earlier" id="earlierForm" hidden>
+        <label class="field">
+          <span class="label-sm">Started on</span>
+          <input type="datetime-local" id="earlierInput" required>
+        </label>
+        <button class="btn primary" type="submit">Begin from this time</button>
+        <p class="hint" id="setupHint" aria-live="polite"></p>
+      </form>
+    </div>
+  </main>
+
+  <main class="app" id="app" hidden>
+
+    <!-- ───────────── Present · Dashboard ───────────── -->
+    <section class="screen" id="present" data-screen>
+      <section class="greet">
+        <div class="row between">
+          <span class="label-sm muted wide" id="todayDate"></span>
+          <span class="chip sage"><span class="dot pulse" aria-hidden="true"></span>Anchored</span>
+        </div>
+        <h1 class="headline-md" id="greeting"></h1>
+      </section>
+
+      <section class="card low hero">
+        <span class="chip tan hero-phase"><span class="ms" aria-hidden="true">psychology</span><span id="phaseChip"></span></span>
+        <div class="halo" id="halo" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <svg viewBox="0 0 200 200" aria-hidden="true">
+            <circle class="halo-track" cx="100" cy="100" r="88"/>
+            <circle class="halo-ticks" cx="100" cy="100" r="78"/>
+            <circle class="halo-arc" id="haloArc" cx="100" cy="100" r="88"/>
+          </svg>
+          <div class="halo-center">
+            <span class="label-sm muted widest">Sovereignty</span>
+            <span class="display gold" id="daysText"></span>
+            <span class="clock" id="clock"></span>
+          </div>
+        </div>
+        <div class="row between hero-foot">
+          <span class="label-sm muted" id="targetLabel"></span>
+          <span class="label-sm tan" id="targetPct"></span>
+        </div>
+      </section>
+
+      <section class="card mid sos">
+        <div class="row gap-3">
+          <span class="tile"><span class="ms tan" aria-hidden="true">waves</span></span>
+          <div class="col">
+            <span class="label-sm tan">Urge surfing</span>
+            <h2 class="title-md">Feel an urge rising?</h2>
+          </div>
+        </div>
+        <button class="btn primary" id="sos" type="button">
+          <span class="ms fill" aria-hidden="true">shield</span><span>Enter Anchor [SOS]</span>
+        </button>
+      </section>
+
+      <button class="card low vow" id="vow" type="button">
+        <span class="row gap-3">
+          <span class="vow-mark" id="vowMark"><span class="ms fill" aria-hidden="true">check</span></span>
+          <span class="col">
+            <span class="label-sm muted" id="vowLabel"></span>
+            <span class="title-md" id="vowTitle"></span>
+          </span>
+        </span>
+        <span class="label-sm soft" id="vowTime"></span>
+      </button>
+
+      <article class="card low quote">
+        <div class="row gap-2">
+          <span class="ms tan sm" aria-hidden="true">flare</span>
+          <span class="label-sm tan wide">Neuro-Stoic Synthesis</span>
+        </div>
+        <blockquote class="headline-md italic" id="quoteText"></blockquote>
+        <div class="row between">
+          <span class="label-sm muted" id="quoteMeta"></span>
+          <button class="ghost" id="quoteSave" type="button" aria-pressed="false">
+            <span class="ms sm" aria-hidden="true">bookmark</span><span class="label-sm" id="quoteSaveLabel">Save</span>
+          </button>
+        </div>
+      </article>
+
+      <section class="ledger">
+        <div class="row between pad-x">
+          <span class="label-sm muted wide">Sovereign ledger</span>
+          <span class="label-sm sage" id="weekLabel"></span>
+        </div>
+        <div class="trio">
+          <div class="card low metric">
+            <span class="label-sm muted">Waves</span>
+            <span class="title-lg sage" id="mWaves">0</span>
+            <svg class="spark" viewBox="0 0 60 14" aria-hidden="true"><polyline id="mSpark" points="0,12 60,12"/></svg>
+          </div>
+          <div class="card low metric">
+            <span class="label-sm muted">Time saved</span>
+            <span class="title-lg gold"><span id="mHours">0</span><span class="unit">h</span></span>
+            <span class="bar-track"><span class="bar-fill gold-bg" id="mHoursBar"></span></span>
+          </div>
+          <div class="card low metric">
+            <span class="label-sm muted">Days sealed</span>
+            <span class="title-lg" id="mSealed">0</span>
+            <span class="pips" id="mPips" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="photo photo-sm">
+        <div class="photo-img" style="background-image:url('img/garden.jpg')"></div>
+        <div class="photo-shade"></div>
+        <div class="row between photo-copy">
+          <div>
+            <span class="label-sm tan wide" id="sanctLabel"></span>
+            <p class="body-sm soft" id="sanctLine"></p>
+          </div>
+          <span class="ms tan" id="sanctIcon" aria-hidden="true">bedtime</span>
+        </div>
+      </section>
+
+      <section class="card raised closeout">
+        <div class="row between">
+          <span class="row gap-2">
+            <span class="ms gold sm2" aria-hidden="true">nights_stay</span>
+            <span class="label-sm gold wide">Evening closeout</span>
+          </span>
+          <span class="label-sm muted" id="closeMeta">3 min</span>
+        </div>
+        <div class="duo" id="closeActions">
+          <button class="btn-quiet lift" id="closeDefer" type="button">Defer to 10 PM</button>
+          <button class="btn-quiet" id="closeBegin" type="button"><span>Begin Audit</span><span class="ms sm" aria-hidden="true">arrow_forward</span></button>
+        </div>
+        <p class="body-sm soft" id="closeNote" hidden></p>
+      </section>
+    </section>
+
+    <!-- ───────────── Anchor · Urge intercept ───────────── -->
+    <section class="screen wide-gap" id="anchor" data-screen hidden>
+      <section class="col gap-2">
+        <div class="row between">
+          <span class="row gap-2"><span class="dot gold-bg pulse big" aria-hidden="true"></span><span class="label-sm gold wider">Somatic protocol active</span></span>
+          <span class="label-sm sage-dim wider">Vagal downregulation</span>
+        </div>
+        <div class="card mid center pad-quote">
+          <h2 class="headline-md italic gold">“A 90-second wave. It will crest and dissolve.”</h2>
+          <p class="body-sm soft why" id="whyLine" hidden></p>
+        </div>
+      </section>
+
+      <section class="card low pacer">
+        <div class="row between">
+          <span class="row gap-2"><span class="ms gold sm3" aria-hidden="true">air</span><span class="label-md">Vagus nerve pacer</span></span>
+          <span class="label-sm tan wider" id="cycleCount">Cycle 1 of 4</span>
+        </div>
+        <div class="orb" id="orb" aria-hidden="true">
+          <div class="orb-glow"></div>
+          <div class="orb-ring r1"></div>
+          <div class="orb-ring r2"></div>
+          <div class="orb-ring r3">
+            <div class="orb-core">
+              <span class="label-sm gold wider" id="pacerPhase">Inhale</span>
+              <span class="display light" id="pacerCount">4s</span>
+            </div>
+          </div>
+        </div>
+        <p class="body-md soft center" id="pacerGuide" aria-live="polite">Inhale deeply through your nose.</p>
+        <div class="duo">
+          <button class="mode is-on" id="mode478" type="button" data-mode="478" aria-pressed="true"><span class="ms sm" aria-hidden="true">check</span>4-7-8 Calming</button>
+          <button class="mode" id="modeSigh" type="button" data-mode="sigh" aria-pressed="false"><span class="ms sm" aria-hidden="true">expand_circle_up</span>Double Sigh</button>
+        </div>
+      </section>
+
+      <section class="card mid wave">
+        <div class="row between">
+          <span class="row gap-2"><span class="ms sage sm3" aria-hidden="true">tsunami</span><span class="label-md">Surfing the wave</span></span>
+          <span class="chip sage strong" id="wavePhase">Ready</span>
+        </div>
+        <div class="col gap-2">
+          <div class="row between baseline">
+            <span class="body-sm soft">Wave horizon</span>
+            <span class="row gap-1 baseline"><span class="headline-md gold" id="waveTime">01:30</span><span class="label-sm soft">remaining</span></span>
+          </div>
+          <span class="bar-track thick"><span class="bar-fill gold-bg" id="waveFill" style="width:100%"></span></span>
+        </div>
+        <div class="row gap-2" id="waveIdle">
+          <button class="btn primary grow" id="waveBegin" type="button"><span class="ms" aria-hidden="true">play_arrow</span><span>Begin the wave</span></button>
+        </div>
+        <div class="row gap-2" id="waveRun" hidden>
+          <button class="btn-quiet lift grow upper" id="waveExtend" type="button"><span class="ms sm2" aria-hidden="true">add_circle</span>Extend wave +60s</button>
+          <button class="btn-quiet lift upper" id="wavePause" type="button" aria-label="Pause"><span class="ms sm2" aria-hidden="true">pause</span></button>
+        </div>
+        <div class="col gap-3" id="waveDone" hidden>
+          <p class="headline-sm sage italic center">The wave has passed. You held.</p>
+          <div class="duo">
+            <button class="btn-quiet lift" id="waveAgain" type="button">Surf another</button>
+            <button class="btn-quiet" id="waveBack" type="button"><span>Return to Present</span><span class="ms sm" aria-hidden="true">arrow_forward</span></button>
+          </div>
+        </div>
+      </section>
+
+      <section class="col gap-2">
+        <div class="row gap-2 pad-x"><span class="ms gold sm3" aria-hidden="true">sensors</span><span class="label-md">Tactile interventions</span></div>
+        <div class="col gap-25" id="interventions">
+          <div class="card mid tact" data-tech="Cold Reset">
+            <button class="tact-head" type="button" aria-expanded="false">
+              <span class="tile"><span class="ms gold" aria-hidden="true">water_drop</span></span>
+              <span class="col grow">
+                <span class="title-md">Physiological Cold Reset</span>
+                <span class="body-sm soft clip">Splash cold water over eyes &amp; nostrils</span>
+              </span>
+              <span class="badge">30s</span>
+            </button>
+            <div class="tact-body" hidden>
+              <span class="label-sm gold">Dive reflex active</span>
+              <button class="pill-btn" type="button">Done</button>
+            </div>
+          </div>
+          <div class="card mid tact" data-tech="Clench &amp; Drain">
+            <button class="tact-head" type="button" aria-expanded="false">
+              <span class="tile"><span class="ms gold" aria-hidden="true">sports_mma</span></span>
+              <span class="col grow">
+                <span class="title-md">Isometric Clench &amp; Drain</span>
+                <span class="body-sm soft clip">Clench fists at 100%, exhale &amp; release</span>
+              </span>
+              <span class="badge">5s × 3</span>
+            </button>
+            <div class="tact-body" hidden>
+              <span class="label-sm gold">Clench in progress</span>
+              <button class="pill-btn" type="button">Done</button>
+            </div>
+          </div>
+          <div class="card mid tact" data-tech="Horizon Shift">
+            <button class="tact-head" type="button" aria-expanded="false">
+              <span class="tile"><span class="ms gold" aria-hidden="true">panorama_photosphere</span></span>
+              <span class="col grow">
+                <span class="title-md">Panoramic Horizon Shift</span>
+                <span class="body-sm soft clip">Soften focus &amp; expand peripheral vision</span>
+              </span>
+              <span class="badge">60s</span>
+            </button>
+            <div class="tact-body" hidden>
+              <span class="label-sm gold">Parasympathetic lock</span>
+              <button class="pill-btn" type="button">Grounded</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="col gap-2">
+        <div class="row gap-2 pad-x"><span class="ms gold sm3" aria-hidden="true">safety_check</span><span class="label-md">External anchor tools</span></div>
+        <div class="card mid row between gap-3">
+          <span class="row gap-3 min0">
+            <span class="round sage-box"><span class="ms sage" id="contactIcon" aria-hidden="true">phone_in_talk</span></span>
+            <span class="col min0">
+              <span class="title-md clip" id="contactName"></span>
+              <span class="label-sm sage" id="contactRole"></span>
+            </span>
+          </span>
+          <a class="pill-btn lg" id="contactCall" href="#" hidden><span class="ms sm2" aria-hidden="true">call</span>Call</a>
+          <button class="pill-btn lg quiet" id="contactAdd" type="button" hidden><span class="ms sm2" aria-hidden="true">person_add</span>Add</button>
+        </div>
+        <div class="card mid row between gap-3">
+          <span class="row gap-3 min0">
+            <span class="round"><span class="ms tan" aria-hidden="true">graphic_eq</span></span>
+            <span class="col min0">
+              <span class="title-md clip">Binaural Reset</span>
+              <span class="label-sm soft" id="toneMeta">2 min · Headphones</span>
+            </span>
+          </span>
+          <button class="pill-btn lg quiet" type="button" data-track="reset" data-style="pill"><span class="ms sm2" aria-hidden="true">play_arrow</span><span data-track-label>Play</span></button>
+        </div>
+      </section>
+
+      <section class="card low col gap-2 pad-md">
+        <div class="row gap-2"><span class="ms muted sm2" aria-hidden="true">fingerprint</span><span class="label-md soft">Log trigger signature</span></div>
+        <div class="tags" id="tags">
+          <button class="tag" type="button" data-tag="Boredom" aria-pressed="false"><span class="ms xs" aria-hidden="true">hourglass_empty</span>Boredom</button>
+          <button class="tag" type="button" data-tag="Late Night" aria-pressed="false"><span class="ms xs" aria-hidden="true">bedtime</span>Late Night</button>
+          <button class="tag" type="button" data-tag="Stress" aria-pressed="false"><span class="ms xs" aria-hidden="true">bolt</span>Stress</button>
+          <button class="tag" type="button" data-tag="Isolation" aria-pressed="false"><span class="ms xs" aria-hidden="true">person_off</span>Isolation</button>
+          <button class="tag" type="button" data-tag="Fatigue" aria-pressed="false"><span class="ms xs" aria-hidden="true">battery_low</span>Fatigue</button>
+          <button class="tag" type="button" data-tag="Device Reflex" aria-pressed="false"><span class="ms xs" aria-hidden="true">smartphone</span>Device Reflex</button>
+        </div>
+      </section>
+
+      <section class="col center gap-2">
+        <p class="headline-sm sage italic">You are observing an impulse, not inhabiting it.</p>
+        <p class="label-sm muted wider">Sovereign sanctuary • Stored only on this device</p>
+      </section>
+    </section>
+
+    <!-- ───────────── Clarity · Neuroscience ───────────── -->
+    <section class="screen" id="clarity" data-screen hidden>
+      <section class="col gap-2">
+        <div class="row gap-2"><span class="dot gold-bg" aria-hidden="true"></span><span class="label-sm gold wider">Cognitive architecture</span></div>
+        <h1 class="headline-lg">Neuroscience of Recovery</h1>
+        <p class="body-md soft">The ninety-day arc, and where you stand on it.</p>
+      </section>
+
+      <section class="card mid col gap-4 pad-lg">
+        <div class="row between">
+          <div class="col">
+            <span class="label-sm sage" id="arcLabel"></span>
+            <p class="title-md">Ninety-Day Trajectory</p>
+          </div>
+          <span class="row gap-2"><span class="headline-sm gold" id="arcPct"></span><span class="ms fill gold sm3" aria-hidden="true">neurology</span></span>
+        </div>
+        <svg class="arc" id="arc" viewBox="0 0 320 120" fill="none" role="img" aria-label="Position on the ninety-day arc">
+          <defs>
+            <linearGradient id="arcGrad" gradientUnits="userSpaceOnUse" x1="0" x2="0" y1="0" y2="120">
+              <stop offset="0" stop-color="#e2c399" stop-opacity=".28"/>
+              <stop offset="1" stop-color="#e2c399" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <line class="arc-grid" x1="0" x2="320" y1="20" y2="20"/>
+          <line class="arc-grid" x1="0" x2="320" y1="60" y2="60"/>
+          <line class="arc-base" x1="0" x2="320" y1="100" y2="100"/>
+          <path class="arc-ahead" id="arcAhead"/>
+          <path id="arcArea" fill="url(#arcGrad)"/>
+          <path class="arc-line" id="arcLine"/>
+          <line class="arc-drop" id="arcDrop"/>
+          <circle class="arc-halo" id="arcHalo" r="6"/>
+          <circle class="arc-dot" id="arcDot" r="3.5"/>
+          <text class="arc-t" x="8" y="115">DAY 1</text>
+          <text class="arc-t now" id="arcNow" y="115"></text>
+          <text class="arc-t end" id="arcEnd" x="312" y="115" text-anchor="end">DAY 90</text>
+        </svg>
+        <div class="row between">
+          <span class="label-sm soft wider">Homeostasis trajectory</span>
+          <span class="label-sm sage wider" id="arcPhase"></span>
+        </div>
+        <p class="body-sm muted">A model drawn from days elapsed. It is not a measurement of your body.</p>
+      </section>
+
+      <section class="col gap-4">
+        <div class="row between">
+          <h2 class="title-md upper">Neural timeline</h2>
+          <span class="label-sm soft wider" id="tlActive"></span>
+        </div>
+        <div class="timeline" id="timeline"></div>
+      </section>
+
+      <section class="col gap-4">
+        <div class="row between">
+          <h2 class="title-md upper">Reclaimed capacity</h2>
+          <span class="label-sm sage wider">Cumulative</span>
+        </div>
+        <div class="col gap-3">
+          <div class="card mid row between">
+            <span class="row gap-35"><span class="round sm"><span class="ms gold" aria-hidden="true">timelapse</span></span>
+              <span class="col"><span class="label-sm soft">Time reclaimed</span><span class="headline-sm" id="cHours"></span></span></span>
+            <span class="trend sage" id="cHoursNote"></span>
+          </div>
+          <div class="card mid row between">
+            <span class="row gap-35"><span class="round sm"><span class="ms sage" aria-hidden="true">pan_tool</span></span>
+              <span class="col"><span class="label-sm soft">Waves surfed</span><span class="headline-sm" id="cWaves"></span></span></span>
+            <span class="trend gold" id="cWavesNote"></span>
+          </div>
+          <div class="card mid row between">
+            <span class="row gap-35"><span class="round sm"><span class="ms tan" aria-hidden="true">workspace_premium</span></span>
+              <span class="col"><span class="label-sm soft">Days sealed</span><span class="headline-sm" id="cSealed"></span></span></span>
+            <span class="trend sage" id="cSealedNote"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="card mid col gap-4 pad-lg">
+        <div class="row between">
+          <div class="col">
+            <h2 class="title-md">Resilience Matrix</h2>
+            <p class="body-sm soft" id="matrixSub"></p>
+          </div>
+          <span class="row gap-3">
+            <span class="row gap-15"><span class="sq sage-bg"></span><span class="label-sm soft plain">Anchored</span></span>
+            <span class="row gap-15"><span class="sq gold-bg"></span><span class="label-sm soft plain">Today</span></span>
+          </span>
+        </div>
+        <div class="matrix-head" id="matrixHead" aria-hidden="true"></div>
+        <div class="matrix" id="matrix"></div>
+      </section>
+
+      <section class="col gap-4">
+        <div class="row between">
+          <h2 class="title-md upper">Vulnerability profile</h2>
+          <span class="label-sm soft wider">From your log</span>
+        </div>
+        <div class="card mid col gap-4" id="vuln"></div>
+      </section>
+
+      <section class="card low col center gap-3 pad-lg">
+        <span class="ms gold lg" aria-hidden="true">self_improvement</span>
+        <p class="headline-sm narrow">“The urge is not a mandate; it is merely an electrical echo of an old pathway.”</p>
+        <button class="btn primary full soft-corners" id="reanchor" type="button">Re-anchor Sovereignty</button>
+      </section>
+    </section>
+
+    <!-- ───────────── Reflect · Daily protocol ───────────── -->
+    <section class="screen wide-gap" id="reflect" data-screen hidden>
+      <section class="col">
+        <div class="row gap-1 mb-1">
+          <span class="label-sm tan wide" id="refDay"></span>
+          <span class="sep" aria-hidden="true"></span>
+          <span class="label-sm sage" id="refHorizon"></span>
+        </div>
+        <h1 class="headline-lg" id="refTitle"></h1>
+        <p class="body-sm soft" id="refDate"></p>
+      </section>
+
+      <div class="photo photo-lg">
+        <div class="photo-img full" style="background-image:url('img/dusk.jpg')"></div>
+        <div class="photo-shade soft-shade"></div>
+        <div class="row between photo-copy">
+          <div>
+            <p class="label-sm gold wider">State of presence</p>
+            <p class="headline-sm" id="refState"></p>
+          </div>
+          <span class="ms fill gold xl" id="refIcon" aria-hidden="true">bedtime</span>
+        </div>
+      </div>
+
+      <section class="col gap-2">
+        <div class="row between">
+          <h2 class="title-md row gap-2"><span class="ms tan sm3" aria-hidden="true">security</span>Friction &amp; Urge Log</h2>
+          <span class="chip sage" id="logCount"></span>
+        </div>
+        <div class="card mid col gap-4">
+          <div class="row between inset">
+            <span class="row gap-4 min0">
+              <span class="mini-ring">
+                <svg viewBox="0 0 48 48" aria-hidden="true">
+                  <circle class="mini-track" cx="24" cy="24" r="20"/>
+                  <circle class="mini-arc" id="logRing" cx="24" cy="24" r="20"/>
+                </svg>
+                <span class="label-sm gold" id="logPct"></span>
+              </span>
+              <span class="col min0">
+                <span class="label-lg" id="logTitle"></span>
+                <span class="label-sm sage" id="logSub"></span>
+              </span>
+            </span>
+            <span class="ms fill sage sm4" aria-hidden="true">verified</span>
+          </div>
+          <div class="chips" id="logChips"></div>
+          <button class="btn-quiet lift upper tall" id="noteToggle" type="button" aria-expanded="false" aria-controls="noteBox">
+            <span class="ms sm2" aria-hidden="true">add_circle</span><span id="noteToggleLabel">Log a close call</span>
+          </button>
+          <form class="note-box" id="noteBox" hidden>
+            <label class="label-sm soft" for="noteInput">Context of the friction</label>
+            <div class="note-row">
+              <input class="inset-input" id="noteInput" type="text" maxlength="120" autocomplete="off" placeholder="e.g. Phone boredom at 20:00...">
+              <button class="pill-btn" type="submit">Save</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section class="col gap-2">
+        <div class="row between">
+          <h2 class="title-md row gap-2"><span class="ms gold sm3" aria-hidden="true">graphic_eq</span>Night Grounding Audio</h2>
+          <span class="label-sm soft">Headphones</span>
+        </div>
+        <div class="card mid col gap-2 track" data-track-card="tide">
+          <div class="row gap-2">
+            <button class="play gold-bg" type="button" data-track="tide" aria-label="Play Low Tide"><span class="ms fill" aria-hidden="true">play_arrow</span></button>
+            <span class="col min0">
+              <span class="title-lg clip">Low Tide</span>
+              <span class="label-sm sage clip">Slow surf • 4 min</span>
+            </span>
+          </div>
+          <div class="scrub">
+            <span class="label-sm soft plain" data-track-time>0:00</span>
+            <span class="bars" data-track-bars data-color="gold"></span>
+            <span class="label-sm gold plain">04:00</span>
+          </div>
+        </div>
+        <div class="card mid col gap-2 track" data-track-card="night">
+          <div class="row gap-2">
+            <button class="play" type="button" data-track="night" aria-label="Play Night Wind-Down"><span class="ms fill" aria-hidden="true">play_arrow</span></button>
+            <span class="col min0">
+              <span class="title-lg clip">Night Wind-Down</span>
+              <span class="label-sm tan clip">Binaural hum • 8 min</span>
+            </span>
+          </div>
+          <div class="scrub">
+            <span class="label-sm soft plain" data-track-time>0:00</span>
+            <span class="bars" data-track-bars data-color="tan"></span>
+            <span class="label-sm tan plain">08:00</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="col gap-4">
+        <div class="row between">
+          <h2 class="title-md row gap-2"><span class="ms tan sm3" aria-hidden="true">stylus_note</span>Inquiry &amp; Examination</h2>
+          <span class="label-sm soft wider" id="entryLabel"></span>
+        </div>
+        <div class="card mid col gap-2">
+          <div class="row between gap-2 top">
+            <label class="headline-sm gold" for="jDeficit">What emotional deficit was I trying to numb today?</label>
+            <span class="ms faint sm2" aria-hidden="true">psychology</span>
+          </div>
+          <div class="well"><textarea id="jDeficit" rows="3" placeholder="Write without filter..."></textarea></div>
+          <div class="row between">
+            <span class="label-sm" data-status="deficit"></span>
+            <span class="ms sm" data-status-icon="deficit" aria-hidden="true"></span>
+          </div>
+        </div>
+        <div class="card mid col gap-2">
+          <div class="row between gap-2 top">
+            <label class="headline-sm tan" for="jJoy">Where did I experience real, unmediated joy today?</label>
+            <span class="ms faint sm2" aria-hidden="true">wb_twilight</span>
+          </div>
+          <div class="well"><textarea id="jJoy" rows="3" placeholder="Write without filter..."></textarea></div>
+          <div class="row between">
+            <span class="label-sm" data-status="joy"></span>
+            <span class="ms sm" data-status-icon="joy" aria-hidden="true"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="card seal col center gap-4">
+        <span class="seal-mark"><span class="ms gold" id="sealIcon" aria-hidden="true">workspace_premium</span></span>
+        <div>
+          <h3 class="headline-md">Commitment Renewal</h3>
+          <p class="body-sm soft" id="sealLine"></p>
+        </div>
+        <button class="btn primary full upper" id="sealBtn" type="button"><span class="ms" aria-hidden="true">lock</span><span id="sealBtnLabel">Seal today’s sovereignty</span></button>
+        <p class="label-md sage row gap-15 center-row" id="sealDone" hidden><span class="ms sm" aria-hidden="true">verified</span><span id="sealDoneLabel"></span></p>
+      </section>
+
+      <footer class="col center gap-2">
+        <button class="archive-link" id="openArchive" type="button" aria-haspopup="dialog">
+          <span class="ms sm2" aria-hidden="true">history_edu</span>
+          <span class="label-lg upper" id="archiveLabel"></span>
+          <span class="ms sm" aria-hidden="true">chevron_right</span>
+        </button>
+        <p class="label-sm muted wider" id="sinceLine"></p>
+      </footer>
+    </section>
+  </main>
+
+  <nav class="tabs" id="tabs" aria-label="Main" hidden>
+    <div class="tabs-in">
+      <a class="tab" href="#present" data-tab="present"><span class="ms" aria-hidden="true">spa</span><span class="label-sm">Present</span></a>
+      <a class="tab tab-anchor" href="#anchor" data-tab="anchor"><span class="tab-shield"><span class="ms" aria-hidden="true">shield</span></span><span class="label-sm">Anchor</span></a>
+      <a class="tab" href="#clarity" data-tab="clarity"><span class="ms" aria-hidden="true">insights</span><span class="label-sm">Clarity</span></a>
+      <a class="tab" href="#reflect" data-tab="reflect"><span class="ms" aria-hidden="true">auto_stories</span><span class="label-sm">Reflect</span></a>
+    </div>
+  </nav>
+
+  <!-- ───────────── Settings ───────────── -->
+  <dialog class="sheet" id="settings" aria-labelledby="settingsTitle">
+    <form class="sheet-in" id="settingsForm">
+      <div class="row between">
+        <h2 class="headline-md" id="settingsTitle">Your sanctuary</h2>
+        <button class="icon-btn" id="closeSettings" type="button" aria-label="Close"><span class="ms sm2" aria-hidden="true">close</span></button>
+      </div>
+      <p class="body-sm soft">Stored only on this device. No account, no analytics, nothing sent anywhere.</p>
+
+      <label class="field">
+        <span class="label-sm">What should we call you? (optional)</span>
+        <input class="text-input" type="text" id="nameInput" maxlength="40" autocomplete="off" placeholder="First name">
+      </label>
+
+      <label class="field">
+        <span class="label-sm">Started on</span>
+        <input type="datetime-local" id="startInput">
+      </label>
+      <button class="btn secondary" id="saveStart" type="button">Save start time</button>
+      <p class="hint" id="settingsHint" aria-live="polite"></p>
+
+      <div class="rule" role="presentation"></div>
+
+      <label class="field">
+        <span class="label-sm">Why you are doing this (shown in Anchor)</span>
+        <input class="text-input" type="text" id="whyInput" maxlength="140" autocomplete="off" placeholder="In your own words">
+      </label>
+
+      <label class="field">
+        <span class="label-sm">Time it used to take each day, in minutes</span>
+        <input class="text-input" type="number" id="minutesInput" min="0" max="1440" step="5" inputmode="numeric">
+      </label>
+
+      <div class="rule" role="presentation"></div>
+
+      <label class="field">
+        <span class="label-sm">Trusted contact</span>
+        <input class="text-input" type="text" id="contactNameInput" maxlength="60" autocomplete="off" placeholder="Name">
+      </label>
+      <label class="field">
+        <span class="label-sm">Their phone number</span>
+        <input class="text-input" type="tel" id="contactPhoneInput" maxlength="30" autocomplete="off" placeholder="+1 555 010 0000">
+      </label>
+
+      <div class="rule" role="presentation"></div>
+
+      <button class="btn secondary" id="beginAgain" type="button" data-confirm="Tap again to begin again from now">Begin again from now</button>
+      <button class="ghost-link" id="erase" type="button" data-confirm="Tap again to erase everything">Erase from this device</button>
+    </form>
+  </dialog>
+
+  <!-- ───────────── Past entries ───────────── -->
+  <dialog class="sheet" id="archive" aria-labelledby="archiveTitle">
+    <div class="sheet-in">
+      <div class="row between">
+        <h2 class="headline-md" id="archiveTitle">The ledger</h2>
+        <button class="icon-btn" id="closeArchive" type="button" aria-label="Close"><span class="ms sm2" aria-hidden="true">close</span></button>
+      </div>
+      <div class="col gap-3" id="archiveList"></div>
+    </div>
+  </dialog>
+
+  <script src="app.js?v=1"></script>
+</body>
+</html>
