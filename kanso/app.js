@@ -8,7 +8,7 @@
   const SEC = 1e3, MIN = 60 * SEC, HOUR = 60 * MIN, DAY = 24 * HOUR;
   const ARC_DAYS = 90;
   const WAVE_MS = 90 * SEC;
-  const PAGES = ['sanctuary', 'sos', 'zen', 'journey'];
+  const PAGES = ['sanctuary', 'rank', 'sos', 'zen', 'journey'];
   const ROMAN = ['I', 'II', 'III', 'IV'];
 
   /* A general picture of how a reset tends to feel. Not a measurement of the person using this. */
@@ -17,12 +17,6 @@
     { from: 8, to: 21, name: 'Flat Days, Returning Colour', text: 'The noise drops and a flatness can follow. Small things begin to register again: warm tea, a page of a book, wind.' },
     { from: 22, to: 60, name: 'Widening the Gap', text: 'The space between an impulse and an action gets longer. What was a split-second reflex becomes something you can watch before choosing.' },
     { from: 61, to: 90, name: 'Settling In', text: 'Attention rests more easily on the people and work in front of you. The practice becomes ordinary life rather than effort.' },
-  ];
-
-  const STAGES = [
-    { from: 1, to: 10, name: 'Eliminating Hyper-Stimulation', text: 'No short-form infinite feeds, no recommendation rabbit holes, no late-night screens. Take the sharpest spikes away first.', list: ['Feeds and autoplay off', 'Phone sleeps outside the bedroom'], foot: 'Focus: fewer spikes' },
-    { from: 11, to: 20, name: 'Boredom Tolerance & Natural Baseline', text: 'Welcome unoccupied stillness without reaching for a device. Let subtle pleasures register again: tea, handwriting, quiet walks.', list: ['45 minutes a day fully offline', 'Meals without media'], foot: 'Focus: comfort with quiet' },
-    { from: 21, to: 30, name: 'Deep Focus & Reconnection', text: 'Unbroken ninety-minute blocks of real work. Eye contact and conversation with no screen in between.', list: ['One 24-hour day offline', 'An evening check-in with someone you trust'], foot: 'Focus: depth and connection' },
   ];
 
   const PROMPTS = [
@@ -43,36 +37,27 @@
     '46': [['Inhale through the nose', 4, 'in'], ['Exhale slowly through parted lips', 6, 'out']],
     box: [['Inhale through the nose', 4, 'in'], ['Hold, lungs full', 4, 'hold'], ['Exhale slowly', 4, 'out'], ['Hold, lungs empty', 4, 'hold']],
   };
-  const WAVE_C = 263.89;   // circumference of the ritual timer ring
   const TIDE_CUE = { in: 'The ink draws in', out: 'The ink spreads out', hold: 'Rest in the pause' };
   const BREATH_WORD = { in: 'In', out: 'Out', hold: 'Hold' };
 
-  const RITUALS = {
-    kintsugi: { title: 'Kintsugi of the Soul', kind: 'Self-compassion', mins: 8, lines: [
-      'Sit comfortably. Bring to mind a recent slip or a hard moment, without the story around it.',
-      'Notice where it sits in the body. Let the breath move around that place.',
-      'Name what you needed in that moment: rest, comfort, company, relief.',
-      'Picture the crack filled with gold. It is part of the bowl now, and the bowl still holds water.',
-      'Choose one small thing you will do differently next time. Then let it rest.',
-    ] },
-    shinrin: { title: 'Shinrin-yoku', kind: 'Sensory grounding', mins: 15, lines: [
-      'Walk slowly, slower than feels natural. Leave the phone in your pocket.',
-      'Let your eyes go soft. Count five shades of green, or of grey.',
-      'Listen for the furthest sound you can hear, then the nearest.',
-      'Touch bark, a leaf, a railing, cold air. Notice its temperature.',
-      'Stand still for one minute before you turn back.',
-    ] },
-    zazen: { title: 'Zazen', kind: 'Pure presence', mins: 20, lines: [
-      'Spine upright, hands resting, eyes soft and lowered.',
-      'Rest your attention on the breath in the lower belly.',
-      'When a thought arrives, notice it and return. Nothing else is required.',
-      'Just sitting.',
-    ] },
-  };
-
   const SIT_SECS = 10 * 60;
   const MOSS_SECS = 24 * 60;
-  const SOUND_NAME = { wind: 'Temple wind', rain: 'Monastery rain' };
+  /* The sound garden: each card is one generated soundscape. */
+  const SOUND_CARDS = [
+    { id: 'rain', name: 'Rainfall', note: 'Steady rain over a garden' },
+    { id: 'eaves', name: 'Rain on the Eaves', note: 'Drips from a temple roof' },
+    { id: 'storm', name: 'Distant Storm', note: 'Rain with thunder far away' },
+    { id: 'stream', name: 'Mountain Stream', note: 'Cold water over stones' },
+    { id: 'ocean', name: 'Ocean Tide', note: 'Slow waves, in and out' },
+    { id: 'wind', name: 'Temple Wind', note: 'Wind through the pines' },
+    { id: 'fire', name: 'Hearth Fire', note: 'Embers and a soft crackle' },
+    { id: 'night', name: 'Night Crickets', note: 'A warm field after dusk' },
+    { id: 'bowl', name: 'Singing Bowl', note: 'One held, wavering tone' },
+    { id: 'drone', name: 'Temple Drone', note: 'A low, steady hum' },
+    { id: 'brown', name: 'Brown Noise', note: 'Deep and even' },
+    { id: 'white', name: 'White Noise', note: 'Bright and even' },
+  ];
+  const SOUND_BY_ID = Object.fromEntries(SOUND_CARDS.map((c) => [c.id, c]));
   const BAR_PX = [12, 20, 32, 24, 40, 28, 16, 36, 44, 24, 12, 32, 40, 48, 36, 28, 16, 44, 20, 32, 40, 24, 12, 20, 28, 36, 16, 8];
 
   /* ─────────────── Small helpers ─────────────── */
@@ -157,7 +142,7 @@
       const t = parseLocal(q.get('since'));
       if (Number.isFinite(t) && t <= Date.now()) return t;
     }
-    if (q.has('demo')) return Date.now() - 11.4 * DAY;
+    if (q.has('demo')) return Date.now() - 4.4 * DAY;   // sample data: a four-day streak
     return null;
   }
   let preview = startFromURL();
@@ -186,7 +171,7 @@
   };
 
   /* ─────────────── Sanctuary ─────────────── */
-  /* Rank by whole days held. `ja` is the Japanese word shown under the English name (needs a native check before launch). */
+  /* Rank by whole days held. `ja` is the Japanese word for it (needs a native check before launch). */
   const RANKS = [
     { from: 0, name: 'Wanderer', ja: '旅人', color: '#a3a5a0' }, { from: 1, name: 'Novice', ja: '初心', color: '#8fb0c4' },
     { from: 3, name: 'Seeker', ja: '求道', color: '#d1a96a' }, { from: 7, name: 'Student', ja: '学徒', color: '#d98e6c' },
@@ -233,8 +218,7 @@
     $('rankBig').textContent = rank.name;
     $('rankJa').textContent = rank.ja;
     $('rankJa').classList.toggle('is-two', [...rank.ja].length > 1);
-    $('rankNext').textContent = next ? `${next.name} in ${plural(Math.ceil(next.from - m.exact), 'day')}` : 'The path is walked';
-    $('ringImg').closest('.hero').style.setProperty('--rank', rank.color);
+    document.documentElement.style.setProperty('--rank', rank.color);
     const at = RANKS.indexOf(rank);
     if (!preview) {
       /* Remember the highest rank already shown, so reaching a new one plays the rank-up moment once. */
@@ -242,19 +226,24 @@
       if (seen !== at) { data.rankSeen = at; save(); }
       if (Number.isInteger(seen) && at > seen) playRankUp(firstPaint ? INTRO_MS + 500 : 400);
     }
-    $('rankPath').replaceChildren(...RANKS.map((r, i) => {
-      const li = h('li', i === at ? 'is-now' : i < at ? 'is-past' : '');
-      li.style.setProperty('--c', r.color);
-      const dot = h('i', 'rk-dot');
-      dot.setAttribute('aria-hidden', 'true');
-      li.append(dot, h('span', 'rk-name', r.name), h('small', 'rk-day', r.from ? `Day ${r.from}` : 'Start'));
-      if (i === at) li.setAttribute('aria-current', 'step');
-      return li;
-    }));
-    const part = next ? clamp((m.exact - rank.from) / (next.from - rank.from), 0, 1) : 0;
-    $('rankPath').style.setProperty('--p', ((at + part) / (RANKS.length - 1)).toFixed(4));
+    /* The ranks either side of yours sit beside the ring as smaller seals. */
+    [['rankPrevNb', RANKS[at - 1]], ['rankNextNb', next]].forEach(([id, nb]) => {
+      const el = $(id);
+      el.hidden = !nb;
+      if (!nb) return;
+      el.style.setProperty('--c', nb.color);
+      const seal = el.querySelector('.nb-seal');
+      seal.textContent = nb.ja;
+      seal.classList.toggle('is-two', [...nb.ja].length > 1);
+      el.querySelector('b').textContent = nb.name;
+      /* Label what each side seal is: the rank you are heading for, or the one already earned. */
+      const isNext = id === 'rankNextNb';
+      el.querySelector('.nb-k').textContent = isNext ? 'Next rank' : 'Earned';
+      el.querySelector('small').textContent = isNext ? `in ${plural(Math.ceil(nb.from - m.exact), 'day')}` : nb.from ? `Day ${nb.from}` : 'Start';
+      el.setAttribute('aria-label', `${id === 'rankNextNb' ? 'Next' : 'Previous'} rank: ${nb.name}, ${nb.from ? plural(nb.from, 'day') : 'the start'}. Show the whole path.`);
+    });
     $('ringImg').setAttribute('aria-label', `${plural(m.done, 'day')} clean.`);
-    $('rankImg').setAttribute('aria-label', `Your rank: ${rank.name}.` + (next ? ` ${next.name} at day ${next.from}.` : ''));
+    $('rankImg').setAttribute('aria-label', `Your rank: ${rank.name}.` + (next ? ` ${next.name} at day ${next.from}.` : '') + ' Show the whole path.');
 
     const pi = phaseIndex(m.dayNo);
     $('arcPhase').textContent = `Phase ${ROMAN[pi]}: ${PHASES[pi].name}`;
@@ -273,15 +262,15 @@
       : 'I choose stillness over transient compulsion today.';
     renderClock(m);
   }
-  /* The hero is two screens you swipe between.
-     First: the ensō brushes round over the 24 hours of the current day, with days clean inside.
+  /* Streak page: the ensō brushes round over the 24 hours of the current day, with days clean inside.
      A faint full circle always sits behind the ink.
-     Second: the rank ring and the eight-step path, filled in by renderSanctuary. */
+     Rank page: the rank ring and the eight-step path, filled in by renderSanctuary. */
+  const clockCells = all('[data-clock]');
   function renderClock(m) {
     const into = m.elapsed - m.done * DAY;
-    $('cleanH').textContent = pad(Math.floor(into / HOUR));
-    $('cleanM').textContent = pad(Math.floor((into % HOUR) / MIN));
-    $('cleanS').textContent = pad(Math.floor((into % MIN) / SEC));
+    const clock = { d: m.done, h: Math.floor(into / HOUR), m: Math.floor((into % HOUR) / MIN), s: Math.floor((into % MIN) / SEC) };
+    clockCells.forEach((el) => { const v = clock[el.dataset.clock]; el.textContent = el.dataset.clock === 'd' ? v : pad(v); });
+    $('rankDayWord').textContent = m.done === 1 ? 'day' : 'days';   // both hero screens show it
     /* While the opening animation runs, the stroke and the day count are scaled by its progress. */
     const k = 1 - Math.pow(1 - intro.t, 3);
     $('ringBig').textContent = `${Math.round(m.done * k)}d`;
@@ -314,55 +303,47 @@
   }
   $('ringImg').addEventListener('click', playIntro);
 
-  /* Rank-up moment: slide to the rank screen, then let the CSS draw the ring and stamp the Japanese in.
+  /* Rank tree: opened by clicking the rank ring. Built fresh each time so the entrance animation replays. */
+  function openRankTree() {
+    const m = moment(), at = RANKS.indexOf(rankOf(m.done));
+    const items = RANKS.map((r, i) => {
+      const li = h('li', `tn ${i === at ? 'is-now' : i < at ? 'is-past' : ''}`);
+      li.style.setProperty('--c', r.color);
+      li.style.setProperty('--i', i);
+      const seal = h('span', `seal ${[...r.ja].length > 1 ? 'is-two' : ''} ${i === 6 ? 'r2' : i === 7 ? 'r3' : ''}`, r.ja);
+      seal.lang = 'ja';
+      seal.style.setProperty('--w', `${(2 + i * 0.5).toFixed(1)}px`);
+      const tx = h('span', 'tn-tx');
+      /* The day requirement is the loudest line after the name: a big number in the rank's colour. */
+      const need = h('span', 'tn-day');
+      if (r.from) need.append(h('strong', '', String(r.from)), h('span', '', r.from === 1 ? 'day' : 'days'));
+      else need.append(h('strong', '', 'Start'));
+      tx.append(h('b', '', r.name), need);
+      if (i === at) tx.append(h('small', '', 'You are here'));
+      li.append(seal, tx);
+      if (i === at) li.setAttribute('aria-current', 'step');
+      return li;
+    });
+    $('treeList').replaceChildren(...items);
+    $('rankTree').showModal();
+    items[at].scrollIntoView({ block: 'nearest' });   // on short screens the grid can scroll
+  }
+  ['rankImg', 'rankPrevNb', 'rankNextNb'].forEach((id) => $(id).addEventListener('click', openRankTree));
+  $('treeClose').addEventListener('click', () => $('rankTree').close());
+
+  /* Rank-up moment: open the Rank page, then let the CSS draw the ring and stamp the Japanese in.
      Runs when a new rank is reached, and on demand with ?rankup in the URL (for recording). */
-  let goSlide = () => {};
   let rankUpTimer = 0;
   function playRankUp(delay) {
     clearTimeout(rankUpTimer);
     rankUpTimer = setTimeout(() => {
-      goSlide(1);
+      go('rank');
       if (calmMotion.matches) return;
       const ring = $('rankImg');
       ring.classList.remove('is-rankup');
       void ring.offsetWidth;   // restart the animation
       ring.classList.add('is-rankup');
     }, delay);
-  }
-  {
-    const track = $('heroSwipe'), dots = all('#heroDots button');
-    const calm = calmMotion;
-    const slideNow = () => Math.round(track.scrollLeft / track.clientWidth);
-    const markDot = (i) => dots.forEach((d, k) => d.setAttribute('aria-current', String(k === i)));
-    goSlide = (i) => {
-      i = clamp(i, 0, dots.length - 1);
-      markDot(i);
-      track.scrollTo({ left: i * track.clientWidth, behavior: calm.matches ? 'auto' : 'smooth' });
-    };
-    track.addEventListener('scroll', () => markDot(slideNow()), { passive: true });
-    dots.forEach((d, k) => d.addEventListener('click', () => goSlide(k)));
-    track.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowRight') goSlide(slideNow() + 1);
-      if (e.key === 'ArrowLeft') goSlide(slideNow() - 1);
-    });
-    /* Touch swipes scroll natively; this adds click-and-drag for a mouse. */
-    let drag = null;
-    track.addEventListener('pointerdown', (e) => {
-      if (e.pointerType !== 'mouse' || e.button !== 0) return;
-      drag = { x: e.clientX, left: track.scrollLeft, from: slideNow() };
-      try { track.setPointerCapture(e.pointerId); } catch { /* pointer already gone */ }
-      track.classList.add('is-dragging');
-    });
-    track.addEventListener('pointermove', (e) => { if (drag) track.scrollLeft = drag.left - (e.clientX - drag.x); });
-    const drop = (e) => {
-      if (!drag) return;
-      const dx = e.clientX - drag.x, from = drag.from;
-      drag = null;
-      track.classList.remove('is-dragging');
-      goSlide(Math.abs(dx) > 50 ? from + (dx < 0 ? 1 : -1) : from);
-    };
-    track.addEventListener('pointerup', drop);
-    track.addEventListener('pointercancel', drop);
   }
 
   /* Put the "today" dot on the curve. Needs layout, so it is redone on resize and when the page is shown. */
@@ -634,12 +615,14 @@
   const SAND_RGB = [234, 221, 196];
   const sand = { g: null, w: 0, pw: 0, ph: 0, dpr: 1, hgt: null, noise: null,
     at: null, tips: null, dx: 1, dy: 0, run: 0, down: false, t: 0, quiet: 0, hover: null, raf: 0, last: 0,
-    tool: 'rake', rocks: [], next: null };   // rocks: { fx, fy, r, rot, squash } with fx/fy as fractions of the tray
+    tool: 'rake', rocks: [], next: null, k: 1 };   // rocks: { fx, fy, r, rot, squash } with fx/fy as fractions of the tray
 
   function sandReset() {
     const cv = $('sandCanvas'), f = fit(cv), top = fit($('rakeCanvas'));
     if (!f || !top) return;
     const W = cv.width, H = cv.height, dpr = W / f.w;
+    // In full screen the rake, its grooves and the rocks grow with the tray
+    sand.k = $('sandCard').classList.contains('is-full') ? clamp(Math.min(f.w, f.h) / 380, 1, 2.2) : 1;
     if (!sand.noise || sand.noise.length !== W * H) {
       // Fine grain over soft, cloudy patches a few millimetres across
       const cell = Math.round(7 * dpr), cw = Math.ceil(W / cell) + 2, ch = Math.ceil(H / cell) + 2, cloud = new Float32Array(cw * ch);
@@ -654,7 +637,7 @@
         }
       }
     }
-    Object.assign(sand, { g: f.g, w: f.w, pw: W, ph: H, dpr, hgt: new Float32Array(W * H), at: null, tips: null, down: false });
+    Object.assign(sand, { g: f.g, w: f.w, h: f.h, pw: W, ph: H, dpr, hgt: new Float32Array(W * H), at: null, tips: null, down: false });
     grains.length = 0;
     sandShade(0, 0, W, H);
     drawRake();
@@ -677,7 +660,7 @@
   }
   /* One tine drawn from a to b (device pixels): a thin groove, only ever cutting deeper */
   function sandGroove(ax, ay, bx, by, depth, box) {
-    const W = sand.pw, H = sand.ph, hg = sand.hgt, sig = GROOVE * sand.dpr, reach = sig * 3, two = 2 * sig * sig, deep = depth * 1.15 * sand.dpr;
+    const W = sand.pw, H = sand.ph, hg = sand.hgt, sig = GROOVE * sand.dpr * sand.k, reach = sig * 3, two = 2 * sig * sig, deep = depth * 1.15 * sand.dpr * sand.k;
     const ex = bx - ax, ey = by - ay, len2 = ex * ex + ey * ey || 1;
     const x0 = Math.max(0, Math.floor(Math.min(ax, bx) - reach)), x1 = Math.min(W, Math.ceil(Math.max(ax, bx) + reach) + 1);
     const y0 = Math.max(0, Math.floor(Math.min(ay, by) - reach)), y1 = Math.min(H, Math.ceil(Math.max(ay, by) + reach) + 1);
@@ -698,20 +681,21 @@
   function rakeTo(x, y, now, carve) {
     if (!sand.hgt) sandReset();
     if (!sand.hgt) return;
-    if (!sand.at) Object.assign(sand, { at: { x: x - sand.dx * HANDLE, y: y - sand.dy * HANDLE }, tips: null, t: now });
+    const k = sand.k, handle = HANDLE * k;
+    if (!sand.at) Object.assign(sand, { at: { x: x - sand.dx * handle, y: y - sand.dy * handle }, tips: null, t: now });
     const a = sand.at, vx = x - a.x, vy = y - a.y, reach = Math.hypot(vx, vy);
-    if (reach < 6) return;   // hand right on top of the head: nothing to steer by
-    const dx = vx / reach, dy = vy / reach, pull = reach - HANDLE, d = sand.dpr;   // the handle is rigid: pulled when the hand moves away, pushed when it moves in
+    if (reach < 6 * k) return;   // hand right on top of the head: nothing to steer by
+    const dx = vx / reach, dy = vy / reach, pull = reach - handle, d = sand.dpr;   // the handle is rigid: pulled when the hand moves away, pushed when it moves in
     const tx = a.x + dx * pull, ty = a.y + dy * pull;
     const tips = [];
     for (let tine = 0; tine < TINES; tine++) {
-      const o = (tine - (TINES - 1) / 2) * TINE_GAP;
+      const o = (tine - (TINES - 1) / 2) * TINE_GAP * k;
       tips.push([(tx - dy * o) * d, (ty + dx * o) * d]);
     }
     const swing = sand.tips ? Math.hypot(tips[0][0] - sand.tips[0][0], tips[0][1] - sand.tips[0][1]) / d : 0;   // how far the outermost tine moved
     if (carve && sand.tips && swing > 0.3) {
       sand.run += Math.max(Math.abs(pull), swing);
-      const depth = Math.min(1, sand.run / 22) ** 1.4, box = [Infinity, Infinity, -1, -1];   // the tines sink in over the first couple of centimetres
+      const depth = Math.min(1, sand.run / (22 * k)) ** 1.4, box = [Infinity, Infinity, -1, -1];   // the tines sink in over the first couple of centimetres
       tips.forEach((p, tine) => sandGroove(sand.tips[tine][0], sand.tips[tine][1], p[0], p[1], depth, box));
       sandShade(box[0] - 1, box[1] - 1, box[2] + 1, box[3] + 1);
       // Now and then a grain flicks up off a tine and drops back
@@ -806,7 +790,8 @@
     const img = rockSprite(rock);
     g.save();
     g.globalAlpha = ghost ? 0.55 : 1;
-    g.drawImage(img, x - rock.half, y - rock.half, rock.half * 2, rock.half * 2);
+    const half = rock.half * sand.k;
+    g.drawImage(img, x - half, y - half, half * 2, half * 2);
     g.restore();
   }
   /* The overlay: rocks, grains in the air, and the wooden rake — head on the sand, handle up to the hand */
@@ -827,7 +812,7 @@
       return;
     }
     if (!p || !hand) return;
-    const head = (TINES - 1) * TINE_GAP + 9, grip = Math.min(HANDLE, Math.hypot(hand.x - p.x, hand.y - p.y));
+    const head = (TINES - 1) * TINE_GAP + 9, grip = Math.min(HANDLE, Math.hypot(hand.x - p.x, hand.y - p.y) / sand.k);
     // Seen from above, x runs along the handle. Each piece is a rounded bar of wood shaded across
     // its width like a pole: pale along the top, darker toward the edges.
     const wood = (x, y, w, hgt, alongX, pale, mid, dark) => {
@@ -837,7 +822,7 @@
       g.beginPath(); g.roundRect(x, y, w, hgt, Math.min(w, hgt) / 2); g.fill();
     };
     g.save();
-    g.translate(p.x, p.y); g.rotate(Math.atan2(sand.dy, sand.dx));
+    g.translate(p.x, p.y); g.rotate(Math.atan2(sand.dy, sand.dx)); g.scale(sand.k, sand.k);
     g.save();   // one shadow for the whole rake, thrown down and to the right whichever way it is turned
     g.shadowColor = 'rgb(62 42 14 / .38)'; g.shadowBlur = 6; g.shadowOffsetX = 3; g.shadowOffsetY = 4;
     g.fillStyle = '#7a5a34';
@@ -869,7 +854,7 @@
       const [x, y] = at(e);
       if (sand.tool === 'rock') {   // click a rock to lift it, click bare sand to set one down
         const r = cv.getBoundingClientRect();
-        const hit = sand.rocks.findLastIndex((k) => Math.hypot(k.fx * r.width - x, k.fy * r.height - y) < k.r);
+        const hit = sand.rocks.findLastIndex((k) => Math.hypot(k.fx * r.width - x, k.fy * r.height - y) < k.r * sand.k);
         if (hit >= 0) sand.rocks.splice(hit, 1);
         else { sand.rocks.push(Object.assign(sand.next || newRock(), { fx: x / r.width, fy: y / r.height })); sand.next = null; }
         sand.hover = e.pointerType === 'mouse' ? { x, y } : null;
@@ -904,7 +889,37 @@
         : 'Hold and pull the rake across the sand. There is nothing to finish and nothing to get right.';
       drawRake();
     }));
-    new ResizeObserver(() => { const r = cv.getBoundingClientRect(); if (r.width && Math.round(r.width) !== sand.w) sandReset(); }).observe($('sandScene'));
+    // A tray that changes shape (window resize, full screen) is laid fresh; rocks keep their places
+    new ResizeObserver(() => {
+      const r = cv.getBoundingClientRect();
+      if (r.width && (Math.round(r.width) !== sand.w || Math.round(r.height) !== sand.h)) sandReset();
+    }).observe($('sandScene'));
+  }
+
+  /* Full screen for the two scenes. The card always fills the window; where the browser allows, it also takes the whole display. */
+  {
+    const fullEl = () => document.fullscreenElement || document.webkitFullscreenElement || null;
+    const setFull = (card, on) => {
+      card.classList.toggle('is-full', on);
+      document.documentElement.classList.toggle('has-full', on);
+      card.querySelector('[data-full]').textContent = on ? 'Exit full screen' : 'Full screen';
+    };
+    const leave = (card) => {
+      setFull(card, false);
+      if (fullEl() === card) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    };
+    all('[data-full]').forEach((btn) => btn.addEventListener('click', () => {
+      const card = btn.closest('.wave-card');
+      if (card.classList.contains('is-full')) { leave(card); return; }
+      setFull(card, true);
+      const ask = card.requestFullscreen || card.webkitRequestFullscreen;
+      if (ask) { try { const p = ask.call(card); if (p && p.catch) p.catch(() => {}); } catch {} }
+    }));
+    // Esc, or the browser's own exit, leaves native full screen: bring the card back with it
+    ['fullscreenchange', 'webkitfullscreenchange'].forEach((name) => document.addEventListener(name, () => {
+      if (!fullEl()) all('.wave-card.is-full').forEach((card) => setFull(card, false));
+    }));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') all('.wave-card.is-full').forEach(leave); });
   }
 
   /* Sound for both scenes: filtered noise, quiet until the breath or the rake moves */
@@ -969,12 +984,20 @@
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !blankEl.hidden) blankEl.hidden = true; });
 
   /* ─────────────── Sound: generated in the browser, nothing is downloaded ─────────────── */
-  const audio = { ctx: null, id: null, paused: false, master: null, nodes: [], t0: 0, secs: 0, timer: 0, onDone: null };
+  const VOL_KEY = 'kanso.volume';
+  let volume = 0.8;
+  try { const v = parseFloat(localStorage.getItem(VOL_KEY)); if (v >= 0 && v <= 1) volume = v; } catch {}
+  const audio = { ctx: null, out: null, id: null, paused: false, master: null, nodes: [], t0: 0, secs: 0, timer: 0, onDone: null };
 
   function audioCtx() {
     const Ctx = window.AudioContext || window.webkitAudioContext;
     if (!Ctx) return null;
-    if (!audio.ctx) audio.ctx = new Ctx();
+    if (!audio.ctx) {
+      audio.ctx = new Ctx();
+      audio.out = audio.ctx.createGain();   // the volume slider
+      audio.out.gain.value = volume;
+      audio.out.connect(audio.ctx.destination);
+    }
     return audio.ctx;
   }
   function noiseSource(ctx, brown) {
@@ -995,8 +1018,7 @@
     return src;
   }
   /* source → filters → gain → out, with an optional slow swell on the level */
-  function layer(ctx, out, brown, filters, level, swell, rate) {
-    const src = noiseSource(ctx, brown);
+  function chain(ctx, out, src, filters, level, swell, rate) {
     const nodes = [src];
     let tail = src;
     for (const [type, freq, q] of filters) {
@@ -1015,15 +1037,87 @@
     }
     return nodes;
   }
+  const layer = (ctx, out, brown, filters, level, swell, rate) => chain(ctx, out, noiseSource(ctx, brown), filters, level, swell, rate);
+  function tone(ctx, out, freq, level, swell, rate) {
+    const osc = ctx.createOscillator();
+    osc.frequency.value = freq;
+    osc.start();
+    return chain(ctx, out, osc, [], level, swell, rate);
+  }
+  /* Scattered short bursts: drips, crackle, bubbles */
+  function specks(ctx, out, perSec, ms, filters, level) {
+    const secs = 9, len = ctx.sampleRate * secs;
+    const buf = ctx.createBuffer(1, len, ctx.sampleRate), d = buf.getChannelData(0);
+    const span = Math.floor((ctx.sampleRate * ms) / 1000);
+    for (let n = Math.floor(perSec * secs); n > 0; n--) {
+      const at = Math.floor(Math.random() * (len - span)), amp = 0.25 + Math.random() * 0.75;
+      for (let i = 0; i < span; i++) d[at + i] += (Math.random() * 2 - 1) * amp * Math.exp((-5 * i) / span);
+    }
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    src.loop = true;
+    src.start();
+    return chain(ctx, out, src, filters, level);
+  }
+  const rainBed = (ctx, out, k) => [
+    ...layer(ctx, out, false, [['highpass', 1200], ['lowpass', 7500]], 0.05 * k, 0.012 * k, 0.11),
+    ...layer(ctx, out, true, [['lowpass', 420]], 0.3 * k, 0.06 * k, 0.05),
+  ];
   const SOUNDS = {
-    rain: (ctx, out) => [
-      ...layer(ctx, out, false, [['highpass', 1200], ['lowpass', 7500]], 0.05, 0.012, 0.11),
-      ...layer(ctx, out, true, [['lowpass', 420]], 0.3, 0.06, 0.05),
+    rain: (ctx, out) => rainBed(ctx, out, 1),
+    eaves: (ctx, out) => [
+      ...rainBed(ctx, out, 0.6),
+      ...specks(ctx, out, 9, 34, [['bandpass', 1700, 1.4]], 0.5),
+      ...specks(ctx, out, 2, 60, [['bandpass', 700, 2]], 0.6),
+    ],
+    storm: (ctx, out) => [
+      ...rainBed(ctx, out, 0.9),
+      ...layer(ctx, out, true, [['lowpass', 90]], 0.5, 0.45, 0.045),
+      ...layer(ctx, out, true, [['lowpass', 55]], 0.3, 0.28, 0.019),
+    ],
+    stream: (ctx, out) => [
+      ...layer(ctx, out, false, [['bandpass', 900, 0.5]], 0.05, 0.02, 0.31),
+      ...layer(ctx, out, false, [['bandpass', 2600, 0.8]], 0.028, 0.014, 0.47),
+      ...specks(ctx, out, 38, 20, [['bandpass', 1400, 2.2]], 0.22),
+      ...layer(ctx, out, true, [['lowpass', 300]], 0.14, 0.04, 0.09),
+    ],
+    ocean: (ctx, out) => [
+      ...layer(ctx, out, true, [['lowpass', 500]], 0.42, 0.38, 0.09),
+      ...layer(ctx, out, false, [['highpass', 1500], ['lowpass', 6000]], 0.03, 0.028, 0.09),
+      ...layer(ctx, out, true, [['lowpass', 120]], 0.2, 0.08, 0.04),
     ],
     wind: (ctx, out) => [
       ...layer(ctx, out, true, [['bandpass', 420, 0.6]], 0.55, 0.3, 0.07),
       ...layer(ctx, out, true, [['lowpass', 160]], 0.22, 0.08, 0.03),
     ],
+    fire: (ctx, out) => [
+      ...layer(ctx, out, true, [['lowpass', 220]], 0.4, 0.1, 0.13),
+      ...layer(ctx, out, false, [['bandpass', 3000, 0.4]], 0.012, 0.006, 0.4),
+      ...specks(ctx, out, 7, 12, [['highpass', 900]], 0.45),
+      ...specks(ctx, out, 1.5, 50, [['bandpass', 500, 1]], 0.55),
+    ],
+    night: (ctx, out) => [
+      ...layer(ctx, out, true, [['lowpass', 300]], 0.12, 0.03, 0.04),
+      ...tone(ctx, out, 4300, 0.011, 0.011, 22),
+      ...tone(ctx, out, 3900, 0.007, 0.007, 17),
+      ...tone(ctx, out, 4750, 0.004, 0.004, 31),
+    ],
+    bowl: (ctx, out) => [
+      ...tone(ctx, out, 196, 0.12, 0.05, 0.11),
+      ...tone(ctx, out, 197.3, 0.1),
+      ...tone(ctx, out, 541, 0.04, 0.03, 0.07),
+      ...tone(ctx, out, 543.2, 0.03),
+      ...tone(ctx, out, 1058, 0.012, 0.01, 0.05),
+    ],
+    drone: (ctx, out) => [
+      ...tone(ctx, out, 65.4, 0.22, 0.06, 0.05),
+      ...tone(ctx, out, 98, 0.12, 0.05, 0.07),
+      ...tone(ctx, out, 130.8, 0.07, 0.04, 0.09),
+      ...tone(ctx, out, 196.5, 0.03, 0.02, 0.04),
+      ...layer(ctx, out, true, [['lowpass', 200]], 0.1),
+    ],
+    brown: (ctx, out) => layer(ctx, out, true, [['lowpass', 700]], 0.5),
+    white: (ctx, out) => layer(ctx, out, false, [['lowpass', 8000]], 0.06),
   };
   function bell(ctx, when) {
     [1, 2.76, 5.4].forEach((mult, i) => {
@@ -1033,7 +1127,7 @@
       gain.gain.setValueAtTime(0.0001, when);
       gain.gain.linearRampToValueAtTime(0.2 / (i + 1), when + 0.02);
       gain.gain.exponentialRampToValueAtTime(0.0001, when + 7 - i * 1.6);
-      osc.connect(gain); gain.connect(ctx.destination);
+      osc.connect(gain); gain.connect(audio.out);
       osc.start(when); osc.stop(when + 7.2);
     });
   }
@@ -1061,9 +1155,11 @@
     const master = ctx.createGain();
     master.gain.setValueAtTime(0, t0);
     master.gain.linearRampToValueAtTime(1, t0 + 3);
-    master.gain.setValueAtTime(1, t0 + secs - 5);
-    master.gain.linearRampToValueAtTime(0, t0 + secs);
-    master.connect(ctx.destination);
+    if (Number.isFinite(secs)) {   // an open-ended sound has no fade-out to schedule
+      master.gain.setValueAtTime(1, t0 + secs - 5);
+      master.gain.linearRampToValueAtTime(0, t0 + secs);
+    }
+    master.connect(audio.out);
     Object.assign(audio, { master, id, t0, secs, onDone: (opts && opts.onDone) || null, nodes: SOUNDS[sound](ctx, master) });
     if (opts && opts.bells) { bell(ctx, t0 + 0.15); bell(ctx, t0 + secs - 7); }
     audio.timer = setInterval(() => {
@@ -1102,12 +1198,22 @@
     btn.firstElementChild.textContent = playing('sit') ? 'pause' : 'play_arrow';
     btn.setAttribute('aria-label', playing('sit') ? 'Pause session' : 'Play session');
     $('sitTime').textContent = `${mmss(sat)} / ${mmss(SIT_SECS)}`;
-    const state = audio.id !== 'sit' ? (sitDone ? 'Complete • Logged to your journey' : `Ready • ${SOUND_NAME[sitSound]}`) : `${audio.paused ? 'Paused' : 'Sitting'} • ${SOUND_NAME[sitSound]}`;
+    const name = SOUND_BY_ID[sitSound].name;
+    const state = audio.id !== 'sit' ? (sitDone ? 'Complete • Logged to your journey' : `Ready • ${name}`) : `${audio.paused ? 'Paused' : 'Sitting'} • ${name}`;
+    $('sitSoundName').textContent = name;
     $('sitState').textContent = state;
     const bars = $('sitBars').children, at = Math.floor((sat / SIT_SECS) * bars.length);
     for (let i = 0; i < bars.length; i++) {
       bars[i].className = audio.id === 'sit' ? (i < at ? 'on' : i === at ? 'head' : '') : sitDone ? 'on' : '';
     }
+    // Sound garden
+    const heard = (audio.id === 'sit' || audio.id === 'garden') && !audio.paused ? sitSound : null;
+    all('[data-sound]').forEach((card) => {
+      const on = card.dataset.sound === heard;
+      card.classList.toggle('is-playing', on);
+      card.classList.toggle('is-picked', card.dataset.sound === sitSound);
+      card.setAttribute('aria-pressed', String(on));
+    });
   }
   for (const px of BAR_PX) { const bar = document.createElement('i'); bar.style.height = `${px}px`; $('sitBars').append(bar); }
 
@@ -1125,60 +1231,43 @@
   }
   $('sitPlay').addEventListener('click', () => { if (audio.id === 'sit') audioPauseToggle(); else sitStart(); });
   $('sitRestart').addEventListener('click', () => { if (audio.id === 'sit') sitStart(); else { sitDone = false; renderAudio(); } });
-  all('[data-sound]').forEach((b) => b.addEventListener('click', () => {
-    sitSound = b.dataset.sound;
-    all('[data-sound]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
-    if (audio.id === 'sit') { killNodes(); audio.nodes = SOUNDS[sitSound](audio.ctx, audio.master); }
-    renderAudio();
-  }));
+
+  /* Sound garden: a card plays its sound until it is tapped again. During the sit it swaps the sit's sound instead. */
+  for (const c of SOUND_CARDS) {
+    const card = h('button', 'sound');
+    card.type = 'button';
+    card.dataset.sound = c.id;
+    const eq = h('span', 'sound-eq'), text = h('span', 'sound-text');
+    eq.setAttribute('aria-hidden', 'true');
+    eq.append(h('i'), h('i'), h('i'), h('i'));
+    text.append(h('span', 'sound-name', c.name), h('span', 'sound-note', c.note));
+    card.append(text, icon('play_arrow', 'sound-go'), eq);
+    card.addEventListener('click', () => {
+      if (audio.id === 'sit') {
+        sitSound = c.id;
+        killNodes();
+        audio.nodes = SOUNDS[sitSound](audio.ctx, audio.master);
+        renderAudio();
+      } else if (audio.id === 'garden' && sitSound === c.id) audioStop();
+      else { sitSound = c.id; audioPlay('garden', Infinity, c.id); }
+    });
+    $('soundGrid').append(card);
+  }
+  $('sitSoundBtn').addEventListener('click', () => $('sounds').scrollIntoView({ behavior: 'smooth', block: 'start' }));
+  $('soundVol').value = Math.round(volume * 100);
+  $('soundVol').addEventListener('input', (e) => {
+    volume = e.target.value / 100;
+    if (audio.out) audio.out.gain.setTargetAtTime(volume, audio.ctx.currentTime, 0.03);
+    try { localStorage.setItem(VOL_KEY, String(volume)); } catch {}
+  });
 
   /* ─────────────── Daily Zen ─────────────── */
-  let gateKey = null;
   function renderZen(m) {
     $('zenDay').textContent = `Daily Zen • Day ${m.dayNo}`;
     $('zenPart').textContent = `${m.part} stillness`;
     const pct = Math.round(clamp(m.exact / ARC_DAYS, 0, 1) * 100);
     $('meterArc').style.strokeDashoffset = 100 - pct;
     $('meterText').textContent = `Day ${m.dayNo} • ${pct}% walked`;
-
-    const holder = $('stages');
-    holder.textContent = '';
-    STAGES.forEach((s, i) => {
-      const state = m.dayNo > s.to ? 'done' : m.dayNo >= s.from ? 'active' : 'future';
-      const card = h('article', `card stage is-${state}`);
-      const top = h('div', 'stage-top');
-      top.append(h('span', `label-sm caps ${state === 'active' ? 'coral-text' : 'dim'}`, `Stage 0${i + 1} • Days ${s.from}–${s.to}`));
-      top.append(h('span', `pill ${state === 'active' ? 'coral strong' : state === 'done' ? 'sage' : ''}`,
-        state === 'active' ? 'Active' : state === 'done' ? 'Complete' : `Unlocks in ${plural(s.from - m.dayNo, 'day')}`));
-      card.append(top, h('h3', 'h-sm', s.name), h('p', 'body-sm dim2', s.text));
-      if (state === 'active') {
-        const span = s.to - s.from + 1, inStage = m.dayNo - s.from + 1;
-        const bar = h('div', 'stage-bar'), line = h('div', 'label-sm');
-        line.append(h('span', 'dim', 'Stage completion'), h('span', 'strong', `${inStage} / ${span} days`));
-        const track = h('div', 'track'), fill = h('i');
-        fill.style.width = `${(inStage / span) * 100}%`;
-        track.append(fill);
-        bar.append(line, track);
-        card.append(bar);
-      }
-      const list = h('ul');
-      s.list.forEach((item) => list.append(h('li', '', item)));
-      const foot = h('div', 'stage-foot label-sm');
-      foot.append(h('span', '', s.foot), icon(state === 'future' ? 'lock' : state === 'done' ? 'check_circle' : 'arrow_forward', state === 'done' ? 'sage' : ''));
-      card.append(list, foot);
-      holder.append(card);
-    });
-
-    // Fill today's reflection once per day, so typing is never overwritten by a re-render
-    if (gateKey !== m.key) {
-      gateKey = m.key;
-      const rec = data.days[m.key] || {};
-      $('gateUnease').value = rec.unease || '';
-      $('gatePeace').value = rec.peace || '';
-      all('[data-mind]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mind === rec.mind)));
-      $('gateBtnText').textContent = rec.sealed ? 'Update Reflection' : 'Seal Reflection';
-      $('gateStatus').textContent = rec.sealed ? `Sealed at ${clockTime(rec.sealed)}` : '';
-    }
   }
   function single(group, attr) {
     all(`[${attr}]`, group).forEach((b) => b.addEventListener('click', () => {
@@ -1187,77 +1276,7 @@
     }));
   }
   const picked = (group, attr, key) => { const b = group.querySelector(`[${attr}][aria-pressed="true"]`); return b ? b.dataset[key] : ''; };
-  single($('gateMind'), 'data-mind');
   single($('journalState'), 'data-state');
-
-  $('gateForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const unease = $('gateUnease').value.trim(), peace = $('gatePeace').value.trim();
-    if (!unease && !peace) { $('gateStatus').textContent = 'Write a line in either box first.'; return; }
-    const m = moment(), rec = dayRecord(m);
-    Object.assign(rec, { unease, peace, mind: picked($('gateMind'), 'data-mind', 'mind'), sealed: m.now });
-    save();
-    $('gateStatus').textContent = 'Saved to this device';
-    $('gateBtnText').textContent = 'Update Reflection';
-    renderJourney(m);
-  });
-
-  /* Ritual timer */
-  const ritual = { id: null, state: 'idle', remaining: 0, deadline: 0, timer: 0 };
-  const ritualDlg = $('ritual');
-  function ritualOpen(id) {
-    const r = RITUALS[id];
-    clearInterval(ritual.timer);
-    Object.assign(ritual, { id, state: 'idle', remaining: r.mins * MIN });
-    $('ritualKind').textContent = r.kind;
-    $('ritualTitle').textContent = r.title;
-    renderRitual();
-    ritualDlg.showModal();
-  }
-  function renderRitual() {
-    const r = RITUALS[ritual.id], total = r.mins * MIN, p = 1 - ritual.remaining / total;
-    $('ritualArc').style.strokeDashoffset = WAVE_C * p;
-    $('ritualTime').textContent = mmss(Math.ceil(ritual.remaining / SEC));
-    $('ritualSub').textContent = { idle: `${r.mins} minutes`, running: 'In practice', paused: 'Paused', done: 'Complete' }[ritual.state];
-    $('ritualLine').textContent = ritual.state === 'done'
-      ? 'Complete. Logged to your journey on this device.'
-      : r.lines[Math.min(r.lines.length - 1, Math.floor(p * r.lines.length))];
-    $('ritualBtnIcon').textContent = ritual.state === 'running' ? 'pause' : ritual.state === 'done' ? 'check' : 'play_arrow';
-    $('ritualBtnText').textContent = { idle: 'Begin', running: 'Pause', paused: 'Resume', done: 'Done' }[ritual.state];
-  }
-  function ritualTick() {
-    ritual.remaining = Math.max(0, ritual.deadline - Date.now());
-    if (ritual.remaining <= 0) {
-      clearInterval(ritual.timer);
-      ritual.state = 'done';
-      const r = RITUALS[ritual.id], ctx = audioCtx();
-      if (ctx) { ctx.resume(); bell(ctx, ctx.currentTime + 0.05); }
-      logEvent('sit', { name: r.title, mins: r.mins });
-      renderJourney(moment());
-    }
-    renderRitual();
-  }
-  $('ritualBtn').addEventListener('click', () => {
-    if (ritual.state === 'done') { ritualDlg.close(); return; }
-    if (ritual.state === 'running') {
-      ritual.remaining = Math.max(0, ritual.deadline - Date.now());
-      ritual.state = 'paused';
-      clearInterval(ritual.timer);
-    } else {
-      if (ritual.state === 'idle') {
-        audioStop(); // one sound at a time
-        const ctx = audioCtx();
-        if (ctx) { ctx.resume(); bell(ctx, ctx.currentTime + 0.1); }
-      }
-      ritual.state = 'running';
-      ritual.deadline = Date.now() + ritual.remaining;
-      ritual.timer = setInterval(ritualTick, 250);
-    }
-    renderRitual();
-  });
-  $('ritualClose').addEventListener('click', () => ritualDlg.close());
-  ritualDlg.addEventListener('close', () => { clearInterval(ritual.timer); ritual.state = 'idle'; });
-  all('[data-ritual]').forEach((b) => b.addEventListener('click', () => ritualOpen(b.dataset.ritual)));
 
   /* ─────────────── The year in dots ─────────────── */
   /* One dot per calendar day of this year. A day is dim ("watched") when a fresh start was logged on
@@ -1276,14 +1295,15 @@
     const watched = new Set(resets.map((e) => dayKey(e.t)));
     if (dayKey(start) > origin) watched.add(dayKey(start));   // the start was moved to a later day
     if (!DEMO) return (key) => (key > todayKey ? 'future' : key < origin ? 'before' : watched.has(key) ? 'watched' : 'clean');
-    // Sample year: slips thin out as the months go by, and the last twelve days are clean
+    // Sample year: slips thin out as the months go by, and the days of the current streak are clean
+    const run = Math.max(1, m.done);
     const year = new Date(m.now).getFullYear(), jan1 = new Date(year, 0, 1), sample = new Map();
     let seed = 20261, dim = false;
     const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
     const span = Math.max(1, Math.round((new Date(todayKey) - new Date(dayKey(jan1.getTime()))) / DAY));
     for (let d = new Date(jan1), i = 0; dayKey(d.getTime()) <= todayKey; d.setDate(d.getDate() + 1), i++) {
       const p = 0.62 - 0.5 * (i / span);
-      dim = span - i < 12 ? false : span - i === 12 || rnd() < (dim ? p + 0.18 : p);
+      dim = span - i < run ? false : span - i === run || rnd() < (dim ? p + 0.18 : p);
       sample.set(dayKey(d.getTime()), dim ? 'watched' : 'clean');
     }
     return (key) => (key > todayKey ? 'future' : sample.get(key) || 'before');
@@ -1532,7 +1552,6 @@
     data.start = m.now;
     preview = null;
     save();
-    gateKey = null;
     settings.close();
     renderAll();
   }));
@@ -1541,11 +1560,11 @@
     audioStop();
     waveReset();
     data = blank();
-    preview = null; gateKey = null; showAllEntries = false;
+    preview = null; showAllEntries = false;
     settings.close();
     showSetup();
   }));
-  [settings, ritualDlg].forEach((dlg) => dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); }));
+  settings.addEventListener('click', (e) => { if (e.target === settings) settings.close(); });
 
   /* ─────────────── Go ─────────────── */
   if (startMs()) showApp(); else showSetup();

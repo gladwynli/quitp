@@ -11,7 +11,7 @@
   <link rel="preload" href="fonts/eb-garamond.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/plus-jakarta-sans.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/symbols.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="styles.css?v=2">
+  <link rel="stylesheet" href="styles.css?v=7">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -24,7 +24,8 @@
         <span class="brand-name">KANSO</span>
       </a>
       <nav class="nav" aria-label="Sections">
-        <a href="#sanctuary" data-nav="sanctuary">Sanctuary</a>
+        <a href="#sanctuary" data-nav="sanctuary">Streak</a>
+        <a href="#rank" data-nav="rank">Rank</a>
         <a href="#sos" data-nav="sos"><i class="dot coral" aria-hidden="true"></i>Urge SOS</a>
         <a href="#zen" data-nav="zen">Daily Zen</a>
         <a href="#journey" data-nav="journey">Year in Dots</a>
@@ -60,45 +61,24 @@
     <section class="page" id="sanctuary" data-page>
       <div class="wrap hero">
 
-        <div class="swipe" id="heroSwipe" tabindex="0" role="group" aria-roledescription="carousel" aria-label="Days clean and rank. Swipe or use arrow keys to switch.">
-          <div class="slide">
-            <div class="ring" role="img" id="ringImg" aria-label="Days clean">
-              <svg viewBox="0 0 200 200" aria-hidden="true">
-                <path class="enso-ghost" id="ensoGhost"/>
-                <path class="enso-ink" id="ensoInk"/>
-                <path class="enso-dry" id="ensoDry"/>
-                <path class="enso-strand" id="ensoStrands"/>
-              </svg>
-              <div class="ring-in">
-                <span class="ring-label">Days clean</span>
-                <span class="ring-big" id="ringBig">0d</span>
-              </div>
-            </div>
-            <div class="clean" role="group" aria-label="Time into today">
-              <div class="clean-row">
-                <span class="unit"><b id="cleanH">00</b><small>hours</small></span>
-                <span class="unit"><b id="cleanM">00</b><small>minutes</small></span>
-                <span class="unit"><b id="cleanS">00</b><small>seconds</small></span>
-              </div>
-            </div>
-          </div>
-          <div class="slide">
-            <div class="ring is-rank" role="img" id="rankImg" aria-label="Your rank">
-              <svg viewBox="0 0 200 200" aria-hidden="true"><circle class="rank-circ" cx="100" cy="100" r="78" transform="rotate(-90 100 100)"/></svg>
-              <div class="ring-in">
-                <span class="rank-ja" id="rankJa" lang="ja">旅人</span>
-              </div>
-            </div>
-            <p class="rank-word" id="rankBig">Wanderer</p>
-            <div class="ranks">
-              <ol class="rank-path" id="rankPath" aria-label="Ranks"></ol>
-              <p class="label-sm dim caps" id="rankNext"></p>
-            </div>
+        <div class="ring" role="img" id="ringImg" aria-label="Days clean">
+          <svg viewBox="0 0 200 200" aria-hidden="true">
+            <path class="enso-ghost" id="ensoGhost"/>
+            <path class="enso-ink" id="ensoInk"/>
+            <path class="enso-dry" id="ensoDry"/>
+            <path class="enso-strand" id="ensoStrands"/>
+          </svg>
+          <div class="ring-in">
+            <span class="ring-label">Days clean</span>
+            <span class="ring-big" id="ringBig">0d</span>
           </div>
         </div>
-        <div class="pager" id="heroDots">
-          <button type="button" aria-label="Show days clean" aria-current="true"></button>
-          <button type="button" aria-label="Show rank" aria-current="false"></button>
+        <div class="clean" role="group" aria-label="Time into today">
+          <div class="clean-row">
+            <span class="unit"><b data-clock="h">00</b><small>hours</small></span>
+            <span class="unit"><b data-clock="m">00</b><small>minutes</small></span>
+            <span class="unit"><b data-clock="s">00</b><small>seconds</small></span>
+          </div>
         </div>
 
         <div class="quick">
@@ -208,6 +188,34 @@
       </div>
     </section>
 
+    <!-- ═════════════ RANK ═════════════ -->
+    <section class="page" id="rank" data-page hidden>
+      <div class="wrap hero">
+        <div class="rank-row">
+          <button class="nb" type="button" id="rankPrevNb" aria-label="Previous rank" hidden>
+            <span class="nb-seal" lang="ja"></span>
+            <span class="nb-tx"><i class="nb-k"></i><b></b><small></small></span>
+          </button>
+          <button class="ring is-rank" type="button" id="rankImg" aria-haspopup="dialog" aria-label="Your rank. Show the whole path.">
+            <svg viewBox="0 0 200 200" aria-hidden="true"><circle class="rank-circ" cx="100" cy="100" r="78" transform="rotate(-90 100 100)"/></svg>
+            <span class="ring-in">
+              <span class="rank-ja" id="rankJa" lang="ja">旅人</span>
+            </span>
+          </button>
+          <button class="nb" type="button" id="rankNextNb" aria-label="Next rank" hidden>
+            <span class="nb-seal" lang="ja"></span>
+            <span class="nb-tx"><i class="nb-k"></i><b></b><small></small></span>
+          </button>
+        </div>
+        <p class="rank-word" id="rankBig">Wanderer</p>
+        <div class="since" role="group" aria-label="Time clean">
+          <p class="since-days"><b data-clock="d">0</b> <span id="rankDayWord">days</span></p>
+          <p class="since-clock"><span data-clock="h">00</span>:<span data-clock="m">00</span>:<span data-clock="s">00</span></p>
+        </div>
+        </div>
+      </div>
+    </section>
+
     <!-- ═════════════ URGE SOS ═════════════ -->
     <section class="page" id="sos" data-page hidden>
       <div class="wrap">
@@ -235,7 +243,10 @@
           <article class="card low wave-card" id="waveCard" data-state="idle">
             <div class="tool-bar">
               <h2 class="h-sm">Breathe with the ink</h2>
-              <button class="mode" type="button" data-scene-sound aria-pressed="false">Sound off</button>
+              <div class="row gap8">
+                <button class="mode" type="button" data-scene-sound aria-pressed="false">Sound off</button>
+                <button class="mode" type="button" data-full>Full screen</button>
+              </div>
             </div>
             <div class="tool">
               <div class="scene ink">
@@ -267,7 +278,10 @@
           <article class="card low wave-card" id="sandCard">
             <div class="tool-bar">
               <h2 class="h-sm">Rake the sand</h2>
-              <button class="mode" type="button" data-scene-sound aria-pressed="false">Sound off</button>
+              <div class="row gap8">
+                <button class="mode" type="button" data-scene-sound aria-pressed="false">Sound off</button>
+                <button class="mode" type="button" data-full>Full screen</button>
+              </div>
             </div>
             <div class="tool">
               <div class="scene sand" id="sandScene">
@@ -387,87 +401,21 @@
                   <button class="icon-btn" id="sitRestart" type="button" aria-label="Start the session again"><span class="ms sm3" aria-hidden="true">replay</span></button>
                   <button class="play" id="sitPlay" type="button" aria-label="Play session"><span class="ms lg" aria-hidden="true">play_arrow</span></button>
                 </div>
-                <div class="row gap8 wrap-row" role="group" aria-label="Sound">
-                  <button class="mode" type="button" data-sound="wind" aria-pressed="true"><span class="ms xs sage" aria-hidden="true">air</span>Temple Wind</button>
-                  <button class="mode" type="button" data-sound="rain" aria-pressed="false"><span class="ms xs mist" aria-hidden="true">water_drop</span>Monastery Rain</button>
-                </div>
+                <button class="mode" type="button" id="sitSoundBtn" aria-label="Choose a different sound"><span id="sitSoundName">Temple Wind</span><span class="ms xs" aria-hidden="true">arrow_forward</span></button>
               </div>
             </div>
           </div>
         </article>
 
-        <section class="block">
+        <section class="block" id="sounds">
           <div class="block-head">
             <div>
-              <p class="row gap8"><span class="label-sm gold caps">Thirty-day practice</span><span class="label-sm dim">• Three stages</span></p>
-              <h2 class="h-lg">The Wabi-Sabi Dopamine Protocol</h2>
+              <p class="row gap8"><span class="label-sm sage caps">Sound garden</span><span class="label-sm dim">• Made in your browser, nothing downloaded</span></p>
+              <h2 class="h-lg">Sounds to Sit With</h2>
             </div>
-            <p class="body-sm dim2 measure-sm">A gradual step-down from constant stimulation, taken in three ten-day stages.</p>
+            <label class="vol label-sm dim" for="soundVol"><span>Volume</span><input type="range" id="soundVol" min="0" max="100" step="1" value="80"></label>
           </div>
-          <div class="three" id="stages"></div>
-        </section>
-
-        <section class="block">
-          <div class="block-head">
-            <div><span class="label-sm sage caps">Traditional modalities</span><h2 class="h-lg">Curated Japanese Mindful Rituals</h2></div>
-          </div>
-          <div class="three">
-            <article class="card ritual">
-              <div class="photo kintsugi"><span class="pill dark gold">Self-compassion</span></div>
-              <div class="ritual-body">
-                <div class="row between baseline"><h3 class="h-sm">Kintsugi of the Soul</h3><span class="label-sm dim" lang="ja">金継ぎ</span></div>
-                <p class="body-sm dim2">Healing without shame. A slip is not failure but a fracture, mended with understanding and renewed commitment.</p>
-                <button class="btn soft sm full" type="button" data-ritual="kintsugi"><span class="ms sm2 gold" aria-hidden="true">find_replace</span><span>Begin Guided Repair (8 min)</span></button>
-              </div>
-            </article>
-            <article class="card ritual">
-              <div class="photo forest"><span class="pill dark sage">Sensory grounding</span></div>
-              <div class="ritual-body">
-                <div class="row between baseline"><h3 class="h-sm">Shinrin-yoku</h3><span class="label-sm dim" lang="ja">森林浴</span></div>
-                <p class="body-sm dim2">Forest bathing. Walk slowly among trees, or under open sky, and let natural rhythm replace the cadence of the feed.</p>
-                <button class="btn soft sm full" type="button" data-ritual="shinrin"><span class="ms sm2 sage" aria-hidden="true">forest</span><span>Walk Timer (15 min)</span></button>
-              </div>
-            </article>
-            <article class="card ritual">
-              <div class="photo zazen"><span class="pill dark mist">Pure presence</span></div>
-              <div class="ritual-body">
-                <div class="row between baseline"><h3 class="h-sm">Zazen (Just Sitting)</h3><span class="label-sm dim" lang="ja">座禅</span></div>
-                <p class="body-sm dim2">No visualisation, no destination. Upright spine, eyes soft and lowered, attention resting on the breath in the lower belly.</p>
-                <button class="btn soft sm full" type="button" data-ritual="zazen"><span class="ms sm2 mist" aria-hidden="true">hourglass_empty</span><span>Start Silent Timer (20 min)</span></button>
-              </div>
-            </article>
-          </div>
-        </section>
-
-        <section class="card pad-lg block gate" id="gate">
-          <div class="gate-left">
-            <span class="label-sm sage caps">Evening sanctuary log</span>
-            <h2 class="h-lg">Closing the Gate</h2>
-            <p class="body dim2">The day's inputs have subsided. Without self-judgment, lay down your mental baggage before rest.</p>
-            <div class="prompts">
-              <div class="prompt"><span class="num gold">1</span><div><p class="label-lg">What prompted unease today?</p><p class="body-sm dim">A notification, an unmet expectation, a phantom vibration in your pocket?</p></div></div>
-              <div class="prompt"><span class="num sage">2</span><div><p class="label-lg">Where did I touch genuine peace?</p><p class="body-sm dim">A breath of cold air, warm tea, a moment of unbroken attention.</p></div></div>
-            </div>
-            <p class="row gap8 label-sm dim"><span class="ms sm2 sage" aria-hidden="true">lock</span>Stored only on this device. Never uploaded.</p>
-          </div>
-          <form class="gate-form" id="gateForm">
-            <label class="label-sm dim caps" for="gateUnease">Today's friction and urges</label>
-            <textarea class="line-field" id="gateUnease" rows="3" placeholder="Notice what pulled you out of the present moment, without blaming yourself…"></textarea>
-            <label class="label-sm dim caps" for="gatePeace">Today's anchor</label>
-            <textarea class="line-field" id="gatePeace" rows="3" placeholder="Where did stillness welcome you today? Describe one tangible sensation…"></textarea>
-            <div class="gate-foot">
-              <div class="row gap8 wrap-row" role="group" aria-label="Mind state" id="gateMind">
-                <span class="label-sm dim">Mind state:</span>
-                <button class="mode" type="button" data-mind="Agitated" aria-pressed="false">Agitated</button>
-                <button class="mode" type="button" data-mind="Equanimous" aria-pressed="false">Equanimous</button>
-                <button class="mode" type="button" data-mind="Grounded" aria-pressed="false">Grounded</button>
-              </div>
-              <div class="row gap12 wrap-row">
-                <span class="label-sm sage" id="gateStatus" aria-live="polite"></span>
-                <button class="btn primary sm" type="submit"><span class="ms sm2" aria-hidden="true">ink_pen</span><span id="gateBtnText">Seal Reflection</span></button>
-              </div>
-            </div>
-          </form>
+          <div class="sounds" id="soundGrid" role="group" aria-label="Sounds"></div>
         </section>
       </div>
     </section>
@@ -540,7 +488,8 @@
   </footer>
 
   <nav class="tabs" id="tabs" aria-label="Sections" hidden>
-    <a href="#sanctuary" data-nav="sanctuary"><span class="ms" aria-hidden="true">spa</span><span>Sanctuary</span></a>
+    <a href="#sanctuary" data-nav="sanctuary"><span class="ms" aria-hidden="true">spa</span><span>Streak</span></a>
+    <a href="#rank" data-nav="rank"><svg viewBox="0 0 22 22" width="22" height="22" aria-hidden="true"><circle cx="11" cy="11" r="8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>Rank</span></a>
     <a class="tab-sos" href="#sos" data-nav="sos"><span class="tab-ring"><span class="ms sm2" aria-hidden="true">emergency_heat</span></span><span>Urge SOS</span></a>
     <a href="#zen" data-nav="zen"><span class="ms" aria-hidden="true">self_improvement</span><span>Daily Zen</span></a>
     <a href="#journey" data-nav="journey"><svg class="tab-dots" viewBox="0 0 22 22" width="22" height="22" aria-hidden="true"><circle cx="4" cy="4" r="2.2"/><circle cx="11" cy="4" r="2.2"/><circle cx="18" cy="4" r="2.2"/><circle cx="4" cy="11" r="2.2"/><circle cx="11" cy="11" r="2.2"/><circle cx="18" cy="11" r="2.2"/><circle cx="4" cy="18" r="2.2"/><circle cx="11" cy="18" r="2.2"/><circle cx="18" cy="18" r="2.2" opacity=".35"/></svg><span>Year</span></a>
@@ -556,25 +505,16 @@
     </div>
   </div>
 
-  <!-- Ritual timer -->
-  <dialog class="sheet" id="ritual" aria-labelledby="ritualTitle">
-    <div class="sheet-in center-col">
-      <span class="label-sm sage caps" id="ritualKind">Ritual</span>
-      <h2 class="h-md" id="ritualTitle">Zazen</h2>
-      <div class="wave-ring small">
-        <svg viewBox="0 0 100 100" aria-hidden="true"><circle class="wave-track" cx="50" cy="50" r="42"/><circle class="wave-arc sage-arc" id="ritualArc" cx="50" cy="50" r="42" transform="rotate(-90 50 50)"/></svg>
-        <div class="ring-in"><span class="ring-num" id="ritualTime" role="timer">20:00</span><span class="label-sm dim" id="ritualSub">Ready</span></div>
-      </div>
-      <p class="body dim2 ritual-line" id="ritualLine" aria-live="polite"></p>
-      <div class="row gap12 center-row wrap-row">
-        <button class="btn primary" id="ritualBtn" type="button"><span class="ms sm2" aria-hidden="true" id="ritualBtnIcon">play_arrow</span><span id="ritualBtnText">Begin</span></button>
-        <button class="btn soft" id="ritualClose" type="button">Close</button>
-      </div>
-      <p class="label-sm dim">A bell sounds at the start and at the end.</p>
-    </div>
+  <!-- Settings -->
+  <dialog class="tree" id="rankTree" aria-labelledby="treeTitle">
+    <button class="icon-btn tree-close" type="button" id="treeClose" aria-label="Close"><span class="ms" aria-hidden="true">close</span></button>
+    <header class="tree-head">
+      <h2 class="tree-title" id="treeTitle">The Path</h2>
+      <p class="tree-sub">Days clean needed for each rank</p>
+    </header>
+    <ol class="tree-list" id="treeList"></ol>
   </dialog>
 
-  <!-- Settings -->
   <dialog class="sheet" id="settings" aria-labelledby="settingsTitle">
     <form class="sheet-in" id="settingsForm" method="dialog">
       <div class="row between">
@@ -596,6 +536,6 @@
     </form>
   </dialog>
 
-  <script src="app.js?v=2"></script>
+  <script src="app.js?v=10"></script>
 </body>
 </html>

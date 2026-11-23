@@ -219,19 +219,12 @@ input:focus { box-shadow: inset 0 0 0 1px var(--sage); }
 /* ───────── Sanctuary ───────── */
 .hero { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; padding-block: 20px 64px; }
 .hero > * { position: relative; }
-/* Hero: two screens you swipe between, with pager dots underneath.
-   First: the ensō (today's stroke, days clean inside) and the clock.
-   Second: a thin ring in the rank's colour (--rank) with the rank in English and Japanese, and the path.
+/* Streak page hero: the ensō (today's stroke, days clean inside) and the clock.
+   Rank page hero: a ring in the rank's colour (--rank, set on :root from app.js) with the Japanese inside,
+   then the English name, the clock and the path.
    --d is the circle's diameter; the type inside scales with it. */
-.hero { --rank: var(--sage); }
-.swipe { display: flex; align-self: stretch; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none; cursor: grab; outline-offset: 4px; }
-.swipe::-webkit-scrollbar { display: none; }
-.swipe.is-dragging { cursor: grabbing; scroll-snap-type: none; user-select: none; }
-.slide { flex: 0 0 100%; min-width: 0; display: grid; justify-items: center; align-content: start; scroll-snap-align: center; scroll-snap-stop: always; }
-.pager { display: flex; gap: 10px; margin-top: 18px; }
-.pager button { width: 8px; height: 8px; padding: 0; border-radius: 50%; background: var(--highest); transition: background .2s; }
-.pager button[aria-current="true"] { background: var(--ink); }
-.ring { --d: min(328px, calc(100vw - 2 * var(--gutter) - 24px)); position: relative; flex: none; width: var(--d); height: var(--d); display: grid; place-items: center; }
+:root { --rank: #b8cdaa; }
+.ring { --d: min(420px, calc(100vw - 2 * var(--gutter) - 8px)); position: relative; flex: none; width: var(--d); height: var(--d); display: grid; place-items: center; }
 .ring svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .ring-in { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 24px; }
 .ring-num { font: 300 48px/1.05 var(--serif); letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
@@ -247,37 +240,107 @@ input:focus { box-shadow: inset 0 0 0 1px var(--sage); }
 .ring-big.is-word { font-size: calc(var(--d) * .16); line-height: 1.15; margin-top: calc(var(--d) * .03); }
 .rank-ja { font: 400 calc(var(--d) * .4)/1 "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", "Songti SC", serif; color: var(--rank); }
 .rank-ja.is-two { font-size: calc(var(--d) * .27); letter-spacing: .04em; margin-right: -.04em; }
-.rank-word { margin: -6px 0 0; font: 400 34px/1.2 var(--serif); color: var(--ink); }
+.rank-word { margin: -30px 0 0; font: 400 clamp(48px, 9vw, 68px)/1.1 var(--serif); color: var(--ink); }
+/* Rank page time: days as the headline, the running clock as one quiet line beneath */
+.since { display: grid; justify-items: center; gap: 10px; margin-top: 22px; }
+.since p { margin: 0; }
+.since-days { font: 300 clamp(52px, 10vw, 84px)/1 var(--serif); color: var(--ink); }
+.since-days b { font-weight: 300; font-variant-numeric: tabular-nums; }
+.since-clock { font: 400 clamp(24px, 3.6vw, 36px)/1.2 var(--serif); letter-spacing: .08em; font-variant-numeric: tabular-nums; color: var(--outline); }
+#sanctuary .clean { margin-top: 4px; }
+.hero .clean-row { gap: clamp(22px, 5vw, 44px); }
+.hero .unit b { font-size: clamp(40px, 8vw, 60px); }
+.hero .unit small { font-size: 12px; }
+/* The rank ring and its Japanese glow softly in the rank's colour */
+.ring.is-rank svg { overflow: visible; filter: drop-shadow(0 0 6px var(--rank)) drop-shadow(0 0 18px color-mix(in srgb, var(--rank) 80%, transparent)) drop-shadow(0 0 46px color-mix(in srgb, var(--rank) 55%, transparent)); }
+.ring.is-rank .rank-ja { text-shadow: 0 0 14px color-mix(in srgb, var(--rank) 35%, transparent); }
 .rank-circ { fill: none; stroke: var(--rank); stroke-width: 2.4; stroke-linecap: round; stroke-dasharray: 490.09; }
 /* Rank-up moment: the ring draws itself in the new colour, the Japanese stamps in, then the English name rises */
 .ring.is-rankup .rank-circ { animation: rank-draw 1.5s cubic-bezier(.65, 0, .35, 1) .7s both; }
 .ring.is-rankup .rank-ja { animation: rank-stamp .45s cubic-bezier(.2, 1.5, .4, 1) 2.05s both; }
-.ring.is-rankup ~ .rank-word { animation: rank-rise .6s ease-out 2.45s both; }
-.ring.is-rankup ~ .ranks { animation: rank-rise .7s ease-out 3s both; }
+.rank-row:has(.is-rankup) ~ .rank-word { animation: rank-rise .6s ease-out 2.45s both; }
+.rank-row:has(.is-rankup) ~ .since { animation: rank-rise .6s ease-out 2.8s both; }
+.rank-row:has(.is-rankup) ~ .ranks { animation: rank-rise .7s ease-out 3.1s both; }
 @keyframes rank-draw { from { stroke-dashoffset: 490.09; } to { stroke-dashoffset: 0; } }
 @keyframes rank-stamp { from { opacity: 0; transform: scale(2.2); } to { opacity: 1; transform: scale(1); } }
 @keyframes rank-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-/* Rank path: eight steps on a line; the line is inked as far as you have come */
-.ranks { display: grid; justify-items: center; gap: 22px; margin-top: 30px; width: 100%; }
-.rank-path { --p: 0; position: relative; display: grid; grid-template-columns: repeat(8, 1fr); width: min(780px, 100%); margin: 0; padding: 0; list-style: none; }
-.rank-path::before, .rank-path::after { content: ""; position: absolute; top: 6px; left: 6.25%; height: 1.5px; border-radius: 1px; }
-.rank-path::before { right: 6.25%; background: var(--highest); }
-.rank-path::after { width: calc(87.5% * var(--p)); background: var(--outline); }
-.rank-path li { position: relative; z-index: 1; display: grid; justify-items: center; align-content: start; gap: 2px; min-width: 0; }
-.rk-dot { width: 9px; height: 9px; margin: 2px 0 10px; border-radius: 50%; background: var(--bg); box-shadow: inset 0 0 0 1.5px var(--outline2); }
-.is-past .rk-dot { background: var(--c); box-shadow: none; }
-.is-now .rk-dot { width: 13px; height: 13px; margin: 0 0 8px; background: var(--c); box-shadow: 0 0 0 4px var(--bg); }
-.rk-name { font: 400 16px/22px var(--serif); color: var(--outline2); white-space: nowrap; }
-.rk-day { font: 500 10px/14px var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--outline2); }
-.is-past .rk-name { color: var(--outline); }
-.is-now .rk-name { color: var(--ink); font-size: 18px; }
-.is-now .rk-day { color: var(--c); }
+/* Rank page: your rank large in the middle, with the rank before it (left) and the one after (right)
+   as smaller, quieter seals in their own colours (--c). Their labels hang below without shifting the row. */
+.rank-row { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; column-gap: clamp(2px, 2.5vw, 44px); width: 100%; }
+.rank-row .ring { --d: min(420px, 54vw); grid-column: 2; }
+.nb { --m: calc(min(420px, 54vw) * .34); position: relative; width: var(--m); height: var(--m); cursor: pointer; transition: opacity .25s, transform .25s; }
+.nb:first-child { grid-column: 1; justify-self: end; opacity: .42; }
+.nb:last-child { grid-column: 3; justify-self: start; opacity: .5; }
+.nb:hover, .nb:focus-visible { opacity: 1; transform: scale(1.04); outline: none; }
+.nb-seal { box-sizing: border-box; width: 100%; height: 100%; border-radius: 50%; border: max(1.5px, calc(var(--m) * .018)) solid var(--c); display: grid; place-items: center; color: var(--c); background: color-mix(in srgb, var(--c) 6%, var(--bg)); font: 400 calc(var(--m) * .44)/1 "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", "Songti SC", serif; }
+.nb-seal.is-two { font-size: calc(var(--m) * .3); }
+.nb-tx { position: absolute; top: calc(100% + 10px); left: 50%; transform: translateX(-50%); display: grid; justify-items: center; gap: 3px; white-space: nowrap; }
+.nb-k { font: 500 clamp(9px, .85vw, 11px)/1.2 var(--sans); font-style: normal; letter-spacing: .2em; text-transform: uppercase; color: var(--c); }
+.nb-tx b { font: 400 clamp(14px, 1.9vw, 24px)/1.1 var(--serif); color: var(--ink2); }
+.nb-tx small { font: 500 clamp(9.5px, .95vw, 12px)/1.2 var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--outline); }
+button.ring { cursor: pointer; border-radius: 50%; transition: transform .25s ease; }
+button.ring:hover { transform: scale(1.02); }
+button.ring:active { transform: scale(.985); }
+/* No outline ring around the circle; keyboard focus shows as the same slight lift as hover. */
+button.ring:focus, button.ring:focus-visible { outline: none; }
+button.ring:focus-visible { transform: scale(1.02); }
+
+/* Rank tree: a full-screen grid of the eight ranks, opened from the rank ring.
+   Four across and two down on wide screens (two across, four down on phones), in order from Wanderer to Master.
+   Each rank is a seal in its own colour (--c). Reached ranks glow, the current one is larger,
+   the ones ahead are quieter. On open the seals pop in one by one. */
+.tree { width: 100vw; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: clamp(16px, 3dvh, 36px) 0; border: 0; background: var(--bg); color: var(--ink); overflow: auto; }
+.tree[open] { display: grid; grid-template-rows: auto 1fr; justify-items: center; gap: clamp(10px, 2.5dvh, 28px); }
+.tree::backdrop { background: var(--bg); }
+.tree-close { position: fixed; top: 16px; right: 16px; z-index: 3; }
+.tree-head { text-align: center; padding-inline: 20px; }
+.tree-title { margin: 0; font: 400 clamp(36px, 5vw, 64px)/1.05 var(--serif); }
+.tree-sub { margin: 10px 0 0; font: 500 clamp(11px, 1vw, 13px)/1.3 var(--sans); letter-spacing: .22em; text-transform: uppercase; color: var(--outline); }
+.tree-list { --s: min(15.5vw, 21dvh, 240px); align-self: center; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(22px, 5dvh, 60px) clamp(8px, 2vw, 32px); width: min(1320px, 100%); margin: 0; padding: calc(var(--s) * .12) clamp(12px, 3vw, 48px) 0; box-sizing: border-box; list-style: none; }
+.tn { position: relative; display: grid; justify-items: center; align-content: start; text-align: center; min-width: 0; }
+.seal { --w: 2px; position: relative; z-index: 1; box-sizing: border-box; width: var(--s); height: var(--s); border-radius: 50%; border: var(--w) solid var(--c); display: grid; place-items: center; background: color-mix(in srgb, var(--c) 7%, var(--bg)); color: var(--c); font: 400 calc(var(--s) * .44)/1 "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", "Songti SC", serif; }
+.seal.is-two { font-size: calc(var(--s) * .3); }
+.seal.r2 { box-shadow: 0 0 0 calc(var(--s) * .05) var(--bg), 0 0 0 calc(var(--s) * .05 + 1.5px) var(--c); }
+.seal.r3 { box-shadow: 0 0 0 calc(var(--s) * .05) var(--bg), 0 0 0 calc(var(--s) * .05 + 1.5px) var(--c), 0 0 0 calc(var(--s) * .1 + 1.5px) var(--bg), 0 0 0 calc(var(--s) * .1 + 3px) var(--c); }
+.tn-tx { position: relative; z-index: 1; display: grid; justify-items: center; gap: 2px; margin-top: calc(var(--s) * .2); padding-inline: 4px; }
+.tn-tx b { font: 400 clamp(17px, 1.9vw, 30px)/1.1 var(--serif); color: var(--ink2); }
+.tn-tx small { font: 400 italic clamp(12px, 1.05vw, 16px)/1.25 var(--serif); color: var(--outline); }
+.tn-day { display: inline-flex; align-items: baseline; gap: .4em; margin: 4px 0 2px; color: var(--c); }
+.tn-day strong { font: 400 clamp(24px, 2.7vw, 42px)/1 var(--serif); font-variant-numeric: tabular-nums; }
+.tn-day span { font: 500 clamp(10px, .9vw, 13px)/1 var(--sans); letter-spacing: .16em; text-transform: uppercase; }
+/* ahead of you: quieter, still in colour */
+.tn:not(.is-past):not(.is-now) .seal { opacity: .62; }
+.tn:not(.is-past):not(.is-now) .tn-tx b { color: var(--outline); }
+.tn:not(.is-past):not(.is-now) .tn-day { opacity: .75; }
+/* reached */
+.tn.is-past .seal { filter: drop-shadow(0 0 8px color-mix(in srgb, var(--c) 65%, transparent)); }
+/* you are here */
+.tn.is-now .seal { transform: scale(1.12); filter: drop-shadow(0 0 8px var(--c)) drop-shadow(0 0 30px color-mix(in srgb, var(--c) 75%, transparent)); }
+.tn.is-now .tn-tx b { color: var(--ink); font-size: clamp(20px, 2.4vw, 38px); }
+.tn.is-now .tn-tx small { font: 500 clamp(10px, .85vw, 12px)/1.4 var(--sans); letter-spacing: .18em; text-transform: uppercase; color: var(--c); }
+@media (max-width: 760px) {
+  .tree-list { --s: min(34vw, 13dvh); grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(14px, 2.4dvh, 26px) 8px; }
+  .tn-tx { margin-top: calc(var(--s) * .16); }
+  .tn-tx b { font-size: 21px; } .tn.is-now .tn-tx b { font-size: 24px; }
+  .tn-tx small { font-size: 13px; } .tn-day strong { font-size: 26px; } .tn-day span { font-size: 10.5px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .tree[open] .tree-head { animation: rank-rise .45s ease-out both; }
+  .tree[open] .seal { animation: tree-pop .42s cubic-bezier(.2, 1.4, .4, 1) calc(.15s + var(--i) * .09s) both; }
+  .tree[open] .tn.is-now .seal { animation: tree-pop-now .5s cubic-bezier(.2, 1.4, .4, 1) calc(.15s + var(--i) * .09s) both, tree-pulse 2.4s ease-in-out calc(1.4s + var(--i) * .09s) infinite; }
+  .tree[open] .tn-tx { animation: rank-rise .4s ease-out calc(.25s + var(--i) * .09s) both; }
+}
+@keyframes tree-pop { from { opacity: 0; transform: scale(.4); } }
+@keyframes tree-pop-now { from { opacity: 0; transform: scale(.4); } to { opacity: 1; transform: scale(1.12); } }
+@keyframes tree-pulse { 50% { transform: scale(1.18); } }
+/* Next rank: one hairline that fills toward it, and its name. The whole path lives in the rank tree. */
+.ranks { display: grid; justify-items: center; gap: 14px; margin-top: 30px; width: 100%; }
 .clean { display: grid; justify-items: center; gap: 10px; margin-top: 20px; }
 .clean-row { display: flex; justify-content: center; gap: 32px; }
 .unit { display: grid; justify-items: center; gap: 2px; min-width: 3.2em; }
 .unit b { font: 300 40px/1.05 var(--serif); letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
 .unit small { font: 500 11px/14px var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--outline); }
-.quick { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 32px; }
+.quick { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 60px; }
 .q { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 999px; background: var(--high); box-shadow: 0 1px 2px rgb(0 0 0 / .2); transition: background .3s; text-align: left; }
 .q:hover { background: var(--bright); }
 .q b { font: 600 14px/20px var(--sans); letter-spacing: .04em; }
@@ -336,6 +399,14 @@ input:focus { box-shadow: inset 0 0 0 1px var(--sage); }
 .scene-bar i { display: block; height: 100%; width: 0; background: rgb(30 26 20 / .7); transition: width .3s linear; }
 .scene.ink::after { content: ""; position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 0 0 1px rgb(0 0 0 / .4); border-radius: inherit; }
 .breath-line { display: grid; gap: 2px; justify-items: center; min-height: 52px; }
+/* A scene card in full screen: the scene takes all the room the controls leave */
+.has-full { overflow: hidden; }
+.wave-card.is-full { position: fixed; inset: 0; z-index: 95; width: 100%; height: 100%; margin: 0; padding: var(--md) var(--lg); border-radius: 0; background: var(--low); overflow: auto; }
+.wave-card.is-full .tool { flex: 1; min-height: 0; }
+.wave-card.is-full .scene { flex: 1; aspect-ratio: auto; min-height: 260px; }
+.wave-card.is-full .wave-note { display: none; }
+.wave-card.is-full .scene-word { font-size: 34px; }
+.wave-card::backdrop { background: var(--low); }
 .wave-ring { position: relative; width: 288px; height: 288px; display: grid; place-items: center; }
 .wave-ring.small { width: 220px; height: 220px; }
 .wave-ring svg { position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -388,32 +459,31 @@ input:focus { box-shadow: inset 0 0 0 1px var(--sage); }
 .bars i { flex: none; width: 4px; border-radius: 999px; background: var(--highest); transition: background .3s; }
 .bars i.on { background: var(--sage); }
 .bars i.head { background: var(--coral); width: 6px; }
-.stage { display: flex; flex-direction: column; gap: 12px; padding: var(--md); overflow: hidden; }
-.stage.is-future, .stage.is-done { background: var(--low); }
-.stage.is-active::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 4px; background: var(--coral); }
-.stage-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.stage ul { display: grid; gap: 6px; color: var(--outline); font: 400 13px/20px var(--sans); }
-.stage li { display: flex; align-items: baseline; gap: 8px; }
-.stage li::before { content: ""; flex: none; width: 4px; height: 4px; border-radius: 50%; background: var(--outline); transform: translateY(-3px); }
-.stage-bar { display: grid; gap: 8px; }
-.stage-bar div:first-child { display: flex; justify-content: space-between; }
-.stage-foot { margin-top: auto; padding-top: 12px; display: flex; align-items: center; justify-content: space-between; color: var(--outline); border-top: 1px solid rgb(68 72 64 / .35); }
-.stage-foot .ms { font-size: 18px; }
 .track { height: 6px; border-radius: 999px; background: var(--highest); overflow: hidden; }
 .track i { display: block; height: 100%; border-radius: inherit; background: var(--coral); }
-.ritual { overflow: hidden; display: flex; flex-direction: column; }
-.ritual .photo { height: 176px; padding: 12px; }
-.ritual-body { display: flex; flex-direction: column; gap: 10px; padding: var(--md); flex: 1; }
-.ritual-body .btn { margin-top: auto; }
-.ritual-body p { margin-bottom: 6px; }
-.gate { display: grid; grid-template-columns: 5fr 7fr; gap: var(--lg); }
-.gate-left { display: grid; gap: var(--sm); align-content: start; }
-.prompts { display: grid; gap: var(--md); padding: var(--md); border-radius: 8px; background: var(--low); margin-block: 8px; }
-.prompt { display: flex; align-items: flex-start; gap: 12px; }
-.gate-form { display: grid; gap: 8px; align-content: start; padding: var(--lg); border-radius: var(--r); background: var(--low); }
-.gate-form label:not(:first-child) { margin-top: var(--sm); }
-.gate-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--sm); flex-wrap: wrap; margin-top: var(--sm); }
-.gate-foot > .row:last-child { margin-left: auto; }
+
+/* Sound garden */
+.vol { display: inline-flex; align-items: center; gap: 12px; }
+.vol input { width: 140px; accent-color: var(--sage); cursor: pointer; }
+.sounds { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sm); }
+.sound { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 22px var(--md); border-radius: var(--r); background: var(--mid); text-align: left; box-shadow: 0 1px 2px rgb(0 0 0 / .2), inset 0 0 0 1px transparent; transition: background .2s, box-shadow .2s, transform .2s; }
+.sound:hover { background: var(--high); transform: translateY(-2px); }
+.sound-text { min-width: 0; }
+.sound-go { color: var(--outline); transition: color .2s; }
+.sound:hover .sound-go { color: var(--sage); }
+.sound-eq { flex: none; display: none; align-items: flex-end; gap: 3px; width: 22px; height: 18px; justify-content: center; }
+.sound-eq i { width: 3px; height: 100%; border-radius: 999px; background: var(--sage); transform-origin: bottom; animation: eq 1.1s ease-in-out infinite alternate; }
+.sound-eq i:nth-child(2) { animation-duration: .8s; animation-delay: -.3s; }
+.sound-eq i:nth-child(3) { animation-duration: 1.4s; animation-delay: -.7s; }
+.sound-eq i:nth-child(4) { animation-duration: .95s; animation-delay: -.5s; }
+@keyframes eq { from { transform: scaleY(.25); } to { transform: scaleY(1); } }
+.sound-name { display: block; font: 500 21px/28px var(--serif); color: var(--ink); }
+.sound-note { display: block; margin-top: 2px; color: var(--outline); font: 400 13px/20px var(--sans); }
+.sound.is-picked { box-shadow: 0 1px 2px rgb(0 0 0 / .2), inset 0 0 0 1px var(--outline2); }
+.sound.is-playing { background: var(--high); box-shadow: 0 1px 2px rgb(0 0 0 / .2), inset 0 0 0 1px var(--sage-deep); }
+.sound.is-playing .sound-name { color: var(--sage-bright); }
+.sound.is-playing .sound-go { display: none; }
+.sound.is-playing .sound-eq { display: flex; }
 
 /* ───────── Journey ───────── */
 /* ───────── The year in dots ───────── */
@@ -460,7 +530,6 @@ input:focus { box-shadow: inset 0 0 0 1px var(--sage); }
 .sheet-in .btn { margin-top: 8px; }
 .sheet-in hr { width: 100%; border: 0; border-top: 1px solid var(--outline2); margin-block: var(--sm) 4px; }
 .center-col { justify-items: center; text-align: center; }
-.ritual-line { min-height: 52px; max-width: 360px; }
 
 /* ───────── Setup ───────── */
 .setup { display: grid; place-items: center; padding: calc(var(--top) + 32px) var(--gutter) var(--xl); }
@@ -470,6 +539,7 @@ input:focus { box-shadow: inset 0 0 0 1px var(--sage); }
 /* ───────── Narrow desktop ───────── */
 @media (max-width: 1100px) {
   .four { grid-template-columns: repeat(2, 1fr); }
+  .sounds { grid-template-columns: repeat(3, 1fr); }
 }
 
 /* ───────── Tablet and phone ───────── */
@@ -482,7 +552,8 @@ input:focus { box-shadow: inset 0 0 0 1px var(--sage); }
   .brand-dot { display: block; }
   .brand-name { font-weight: 400; }
   .sos-pill { display: inline-flex; }
-  .split, .session, .gate, .three { grid-template-columns: 1fr; }
+  .split, .session, .three { grid-template-columns: 1fr; }
+  .sounds { grid-template-columns: repeat(2, 1fr); }
   .split { gap: 16px; }
   .stack { gap: 16px; }
   .pad-lg { padding: 20px; } .pad-md { padding: 20px; }
@@ -496,8 +567,6 @@ input:focus { box-shadow: inset 0 0 0 1px var(--sage); }
   .hero { padding-block: 12px 32px; }
   .clean-row { gap: 20px; }
   .ranks { margin-top: 8px; gap: 14px; }
-  .rank-path li:not(.is-now) :is(.rk-name, .rk-day) { visibility: hidden; }
-  .rk-name { font-size: 14px; }
   .unit b { font-size: 32px; }
   .quick { display: grid; grid-template-columns: 1fr 1fr; width: 100%; gap: 12px; }
   .q { border-radius: var(--r); padding: 12px; gap: 10px; background: var(--mid); min-width: 0; }
@@ -521,7 +590,6 @@ input:focus { box-shadow: inset 0 0 0 1px var(--sage); }
   .year { padding: 24px; }
   .year-num { font-size: 64px; } .year-num.sm { font-size: 36px; }
   .endcap { flex-direction: column; align-items: stretch; }
-  .gate-form { padding: 20px; }
   .foot-in { flex-direction: column; align-items: flex-start; }
   .sheet-in { padding: 24px; }
 }
