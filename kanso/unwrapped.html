@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0b0b">
+  <meta name="color-scheme" content="dark">
+  <title>Kanso Unwrapped 2026</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23131413'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%23b8cdaa' stroke-width='3' stroke-linecap='round' stroke-dasharray='48 9'/%3E%3C/svg%3E">
+  <link rel="preload" href="fonts/plus-jakarta-sans.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/eb-garamond-italic.woff2" as="font" type="font/woff2" crossorigin>
+  <style>
+    @font-face { font-family: "EB Garamond"; src: url("fonts/eb-garamond.woff2") format("woff2"); font-weight: 400 700; font-style: normal; font-display: swap; }
+    @font-face { font-family: "EB Garamond"; src: url("fonts/eb-garamond-italic.woff2") format("woff2"); font-weight: 400 700; font-style: italic; font-display: swap; }
+    @font-face { font-family: "Plus Jakarta Sans"; src: url("fonts/plus-jakarta-sans.woff2") format("woff2"); font-weight: 300 800; font-style: normal; font-display: swap; }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body { display: grid; place-items: center; background: #0b0b0b; color: #fff; font: 500 16px/1.4 "Plus Jakarta Sans", system-ui, sans-serif; -webkit-font-smoothing: antialiased; overflow: hidden; }
+    h1, h2, p, ul, ol { margin: 0; padding: 0; list-style: none; }
+    button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+    a { color: inherit; text-decoration: none; }
+
+    /* The story: one tall card, phone-shaped on a desktop, edge to edge on a phone */
+    .phone { --h: min(100dvh, 920px); position: relative; height: var(--h); width: min(100vw, calc(var(--h) * 9 / 16)); overflow: hidden; container-type: size; background: #101010; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+    @media (min-width: 600px) { .phone { border-radius: 28px; box-shadow: 0 30px 90px rgb(0 0 0 / .6); } }
+
+    /* Progress segments and the top row */
+    .segs { position: absolute; z-index: 6; inset: 3cqw 4cqw auto; display: flex; gap: 1cqw; }
+    .segs i { flex: 1; height: 3px; border-radius: 3px; background: color-mix(in srgb, var(--chrome, #fff) 26%, transparent); overflow: hidden; }
+    .segs i b { display: block; height: 100%; width: 0; background: var(--chrome, #fff); border-radius: inherit; }
+    .segs i.done b { width: 100%; }
+    .segs i.now b { animation: seg var(--secs, 6.5s) linear forwards; }
+    .is-held .segs i.now b { animation-play-state: paused; }
+    @keyframes seg { to { width: 100%; } }
+    .chrome { position: absolute; z-index: 6; inset: 6.4cqw 4cqw auto; display: flex; align-items: center; justify-content: space-between; color: var(--chrome, #fff); }
+    .mark { font: 800 2.9cqw/1 "Plus Jakarta Sans", sans-serif; letter-spacing: .22em; }
+    .x { width: 9cqw; height: 9cqw; display: grid; place-items: center; font: 300 7cqw/1 "Plus Jakarta Sans", sans-serif; pointer-events: auto; }
+
+    /* Tap zones: left third goes back, the rest goes on. Hold anywhere to pause. */
+    .tap { position: absolute; z-index: 4; top: 0; bottom: 0; }
+    .tap.prev { left: 0; width: 32%; }
+    .tap.next { right: 0; width: 68%; }
+    .tap:focus-visible { outline: 2px solid #fff; outline-offset: -6px; }
+
+    /* Slides */
+    .slide { --bg: #101010; --fg: #fff; --pop: #c9f560; position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; gap: 3.2cqw; padding: 20cqw 8cqw 14cqw; background: var(--bg); color: var(--fg); opacity: 0; visibility: hidden; transition: opacity .35s ease, visibility 0s .35s; overflow: hidden; }
+    .slide.is-on { opacity: 1; visibility: visible; transition: opacity .35s ease; z-index: 2; }
+    .slide > * { position: relative; z-index: 1; }
+    .r { opacity: 0; }
+    .slide.is-on .r { animation: rise .75s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(var(--i, 0) * .22s + .2s); }
+    @keyframes rise { from { opacity: 0; transform: translateY(7cqw) scale(.96); } to { opacity: 1; transform: none; } }
+
+    .kick { font: 800 3.1cqw/1.2 "Plus Jakarta Sans", sans-serif; letter-spacing: .2em; text-transform: uppercase; color: var(--pop); }
+    .head { font: 800 8.6cqw/1.08 "Plus Jakarta Sans", sans-serif; letter-spacing: -.035em; text-wrap: balance; }
+    .head em, .big em { font-style: normal; color: var(--pop); }
+    .big { font: 800 38cqw/.84 "Plus Jakarta Sans", sans-serif; letter-spacing: -.07em; margin-left: -1.6cqw; font-variant-numeric: tabular-nums; }
+    .big.mid { font-size: 25cqw; letter-spacing: -.06em; }
+    .big.sm { font-size: 17cqw; letter-spacing: -.05em; line-height: .95; margin-left: -.6cqw; }
+    .sub { font: italic 500 6cqw/1.25 "EB Garamond", Georgia, serif; opacity: .86; text-wrap: balance; }
+    .note { font: 600 3cqw/1.4 "Plus Jakarta Sans", sans-serif; letter-spacing: .04em; opacity: .62; }
+    .pill { align-self: flex-start; padding: 1.6cqw 3.6cqw; border-radius: 99px; background: var(--pop); color: var(--bg); font: 800 3.4cqw/1.2 "Plus Jakarta Sans", sans-serif; letter-spacing: .04em; }
+
+    /* Background shapes */
+    .deco { position: absolute !important; z-index: 0 !important; pointer-events: none; }
+    .burst { width: 150cqw; aspect-ratio: 1; border-radius: 50%; background: repeating-conic-gradient(var(--pop) 0 5deg, transparent 5deg 10deg); -webkit-mask: radial-gradient(circle, transparent 0 22%, #000 22.5% 70%, transparent 70.5%); mask: radial-gradient(circle, transparent 0 22%, #000 22.5% 70%, transparent 70.5%); opacity: .3; animation: spin 70s linear infinite; }
+    .rings { width: 130cqw; aspect-ratio: 1; border-radius: 50%; background: repeating-radial-gradient(circle, transparent 0 4.2cqw, var(--pop) 4.2cqw 5cqw); opacity: .28; animation: breathe 9s ease-in-out infinite alternate; }
+    .blob { width: 78cqw; aspect-ratio: 1; background: var(--pop); border-radius: 62% 38% 46% 54% / 44% 58% 42% 56%; opacity: .9; animation: morph 14s ease-in-out infinite alternate, spin 60s linear infinite; }
+    .stripes { width: 200cqw; height: 34cqw; background: repeating-linear-gradient(90deg, var(--pop) 0 5cqw, transparent 5cqw 10cqw); opacity: .3; transform: rotate(-18deg); animation: slide 5s linear infinite; }
+    @keyframes spin { to { rotate: 360deg; } }
+    @keyframes breathe { from { scale: .9; } to { scale: 1.08; } }
+    @keyframes morph { to { border-radius: 40% 60% 58% 42% / 56% 40% 60% 44%; } }
+    @keyframes slide { to { background-position: 10cqw 0; } }
+
+    /* Themes */
+    .t-ink    { --bg: #0e0e0e; --fg: #f6f1e6; --pop: #c9f560; }
+    .t-coral  { --bg: #ff4f38; --fg: #1d0a05; --pop: #fff1d6; }
+    .t-cream  { --bg: #f4ead5; --fg: #17130d; --pop: #ff4f38; }
+    .t-blue   { --bg: #2a3cff; --fg: #ffffff; --pop: #f4ff5e; }
+    .t-violet { --bg: #2b1463; --fg: #f3e9ff; --pop: #ff8fd8; }
+    .t-night  { --bg: #0e0e0e; --fg: #f6f1e6; --pop: #ff8a3c; }
+    .t-wine   { --bg: #7a0f1f; --fg: #ffe9e4; --pop: #ffb44c; }
+    .t-forest { --bg: #0c3327; --fg: #eafff2; --pop: #8cf2bd; }
+    .t-lime   { --bg: #c9f560; --fg: #10200a; --pop: #0c3327; }
+    .t-gold   { --bg: #f2c230; --fg: #1c1500; --pop: #7a0f1f; }
+    .t-teal   { --bg: #0b4f58; --fg: #e6fbff; --pop: #7ef0e0; }
+    .t-plum   { --bg: #5b1040; --fg: #ffe6f4; --pop: #ff9db8; }
+
+    /* Intro */
+    .year { font: 800 37cqw/.8 "Plus Jakarta Sans", sans-serif; letter-spacing: -.07em; margin-left: -1.6cqw; color: transparent; -webkit-text-stroke: .5cqw var(--pop); }
+    .title { font: 800 15.5cqw/.9 "Plus Jakarta Sans", sans-serif; letter-spacing: -.06em; }
+    .hint { position: absolute !important; inset: auto 0 7cqw; text-align: center; font: 700 3cqw/1 "Plus Jakarta Sans", sans-serif; letter-spacing: .2em; text-transform: uppercase; opacity: .6; animation: nudge 1.6s ease-in-out infinite alternate; }
+    @keyframes nudge { to { opacity: .25; } }
+
+    /* Nine day-blocks */
+    .days { display: grid; grid-template-columns: repeat(9, 1fr); gap: 1.6cqw; }
+    .days i { aspect-ratio: 1; border-radius: 1.6cqw; background: color-mix(in srgb, var(--fg) 12%, transparent); overflow: hidden; }
+    .days i b { display: block; height: 100%; width: var(--w, 100%); background: var(--pop); transform: scaleX(0); transform-origin: left; }
+    .slide.is-on .days i b { animation: fill .4s ease-out forwards; animation-delay: calc(1s + var(--n) * .12s); }
+    @keyframes fill { to { transform: none; } }
+
+    /* Two swaps */
+    .swap { display: grid; gap: 1cqw; padding: 4cqw 5cqw; border-radius: 5cqw; background: rgb(255 255 255 / .12); }
+    .swap b { font: 800 13cqw/1 "Plus Jakarta Sans", sans-serif; letter-spacing: -.05em; color: var(--pop); }
+    .swap > span { font: 700 4.4cqw/1.2 "Plus Jakarta Sans", sans-serif; }
+
+    /* Hours of the day */
+    .clock { display: flex; align-items: flex-end; gap: 1cqw; height: 34cqw; }
+    .clock i { flex: 1; height: calc(var(--v) * 1%); min-height: 2px; border-radius: 1cqw 1cqw 0 0; background: color-mix(in srgb, var(--fg) 30%, transparent); transform: scaleY(0); transform-origin: bottom; }
+    .clock i.peak { background: var(--pop); }
+    .slide.is-on .clock i { animation: grow .6s cubic-bezier(.2, .8, .2, 1) forwards; animation-delay: calc(.7s + var(--n) * .035s); }
+    @keyframes grow { to { transform: none; } }
+    .axis { display: flex; justify-content: space-between; margin-top: -1.6cqw; }
+
+    /* A bar that runs from now to later */
+    .span { display: grid; gap: 1.6cqw; }
+    .span-bar { position: relative; height: 6cqw; border-radius: 6cqw; background: color-mix(in srgb, var(--fg) 16%, transparent); overflow: hidden; }
+    .span-bar b, .span-bar u { position: absolute; inset: 0 auto 0 0; border-radius: inherit; transform: scaleX(0); transform-origin: left; }
+    .span-bar u { width: 100%; background: color-mix(in srgb, var(--pop) 45%, transparent); }
+    .span-bar b { width: var(--w); background: var(--fg); }
+    .slide.is-on .span-bar b { animation: fill .7s ease-out .9s forwards; }
+    .slide.is-on .span-bar u { animation: fill 1.4s ease-in-out 1.7s forwards; }
+    .span-ends { display: flex; justify-content: space-between; }
+
+    /* Before and after */
+    .versus { display: grid; grid-template-columns: 1fr 1fr; gap: 3cqw; align-items: end; height: 44cqw; }
+    .versus div { display: grid; grid-template-rows: 1fr auto auto; gap: 1.4cqw; height: 100%; }
+    .versus i { align-self: end; height: calc(var(--v) * 1%); min-height: 1.2cqw; border-radius: 3cqw; background: var(--pop); transform: scaleY(0); transform-origin: bottom; }
+    .versus div:first-child i { background: color-mix(in srgb, var(--fg) 35%, transparent); }
+    .slide.is-on .versus i { animation: grow .8s cubic-bezier(.2, .8, .2, 1) .8s forwards; }
+    .slide.is-on .versus div:last-child i { animation-delay: 1.3s; }
+    .versus b { font: 800 9cqw/1 "Plus Jakarta Sans", sans-serif; letter-spacing: -.04em; }
+
+    /* The year as dots */
+    .dots { display: grid; grid-template-columns: repeat(27, 1fr); gap: .9cqw; }
+    .dots i { aspect-ratio: 1; border-radius: 50%; background: color-mix(in srgb, var(--fg) 14%, transparent); }
+    .dots i.c { background: var(--pop); opacity: 0; }
+    .dots i.w { background: #ff4f38; }
+    .dots i.f { background: none; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fg) 18%, transparent); }
+    .slide.is-on .dots i.c { animation: pop .3s ease-out forwards; animation-delay: calc(.8s + var(--n) * .012s); }
+    @keyframes pop { from { opacity: 0; scale: .2; } to { opacity: 1; scale: 1; } }
+    .key { display: flex; gap: 4cqw; flex-wrap: wrap; }
+    .key span { display: inline-flex; align-items: center; gap: 1.4cqw; }
+    .key i { width: 2.2cqw; height: 2.2cqw; border-radius: 50%; background: var(--pop); }
+
+    /* Rising line */
+    .line { width: 100%; height: auto; overflow: visible; }
+    .line path.l { fill: none; stroke: var(--pop); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; }
+    .line path.a { fill: var(--pop); opacity: 0; }
+    .line circle { fill: var(--bg); stroke: var(--pop); stroke-width: 4; opacity: 0; }
+    .line text { fill: var(--fg); font: 700 11px "Plus Jakarta Sans", sans-serif; letter-spacing: .08em; opacity: .6; }
+    .slide.is-on .line path.l { animation: draw 1.6s cubic-bezier(.4, 0, .2, 1) .8s forwards; }
+    .slide.is-on .line path.a { animation: fade .8s ease-out 1.9s forwards; }
+    .slide.is-on .line circle { animation: show .3s ease-out forwards; animation-delay: calc(.9s + var(--n) * .26s); }
+    @keyframes draw { to { stroke-dashoffset: 0; } }
+    @keyframes fade { to { opacity: .16; } }
+    @keyframes show { to { opacity: 1; } }
+    .fromto { display: flex; align-items: baseline; gap: 3cqw; }
+    .fromto s { text-decoration: none; font: 800 12cqw/1 "Plus Jakarta Sans", sans-serif; letter-spacing: -.05em; opacity: .45; }
+    .fromto span { font: 800 8cqw/1 "Plus Jakarta Sans", sans-serif; opacity: .5; }
+
+    /* Six small stats */
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2.4cqw; }
+    .grid li { display: grid; gap: .8cqw; align-content: start; padding: 4cqw; border-radius: 4.4cqw; background: color-mix(in srgb, var(--fg) 8%, transparent); }
+    .grid li:nth-child(4n + 1), .grid li:nth-child(4n) { background: var(--fg); color: var(--bg); }
+    .grid b { font: 800 11cqw/1 "Plus Jakarta Sans", sans-serif; letter-spacing: -.05em; }
+    .grid b.word { font-size: 7.4cqw; letter-spacing: -.04em; line-height: 1.15; }
+    .grid span { font: 600 3.3cqw/1.3 "Plus Jakarta Sans", sans-serif; opacity: .75; }
+
+    /* The last card */
+    .recap { display: grid; gap: 3cqw; padding: 6cqw; border-radius: 6cqw; background: var(--pop); color: #10200a; }
+    .recap .big { color: #10200a; }
+    .recap ul { display: grid; gap: 0; }
+    .recap li { display: flex; justify-content: space-between; align-items: baseline; gap: 3cqw; padding: 2.2cqw 0; border-top: 1px solid rgb(16 32 10 / .2); font: 600 3.8cqw/1.2 "Plus Jakarta Sans", sans-serif; }
+    .recap li b { font: 800 5.4cqw/1 "Plus Jakarta Sans", sans-serif; letter-spacing: -.03em; }
+    .acts { display: flex; gap: 2.4cqw; z-index: 5 !important; }
+    .acts > * { flex: 1; padding: 3.6cqw 2cqw; border-radius: 99px; text-align: center; font: 800 3.6cqw/1 "Plus Jakarta Sans", sans-serif; letter-spacing: .04em; }
+    .acts .solid { background: var(--fg); color: var(--bg); }
+    .acts .line-btn { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--fg) 40%, transparent); }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0s !important; animation-iteration-count: 1 !important; }
+      .segs i.now b { animation: none; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main class="phone" id="phone" aria-roledescription="story" aria-label="Kanso Unwrapped 2026">
+    <div class="segs" id="segs" aria-hidden="true"></div>
+    <div class="chrome">
+      <span class="mark">KANSO UNWRAPPED</span>
+      <a class="x" href="index.html#journey" aria-label="Close and go back to Kanso">×</a>
+    </div>
+
+    <!-- 1 -->
+    <section class="slide t-ink">
+      <div class="deco burst" style="right:-70cqw; top:-50cqw"></div>
+      <p class="kick r" style="--i:0">Your year, with the wrapping off</p>
+      <p class="year r" style="--i:1">2026</p>
+      <h1 class="title r" style="--i:2">Un<wbr>wrapped</h1>
+      <p class="sub r" style="--i:3">The numbers you never saw, and the ones you earned.</p>
+      <p class="hint">Tap to begin</p>
+    </section>
+
+    <!-- 2 -->
+    <section class="slide t-coral">
+      <div class="deco rings" style="left:-45cqw; bottom:-55cqw"></div>
+      <p class="kick r" style="--i:0">Total time</p>
+      <h2 class="head r" style="--i:1">You spent</h2>
+      <p class="big r" style="--i:2"><span data-n="212">212</span></p>
+      <h2 class="head r" style="--i:3">hours on porn this year.</h2>
+    </section>
+
+    <!-- 3 -->
+    <section class="slide t-cream">
+      <div class="deco blob" style="right:-36cqw; top:-22cqw; opacity:.18"></div>
+      <p class="kick r" style="--i:0">The conversion</p>
+      <h2 class="head r" style="--i:1">That's</h2>
+      <p class="big r" style="--i:2"><em data-n="8.8" data-dec="1">8.8</em></p>
+      <h2 class="head r" style="--i:3">full days.</h2>
+      <div class="days r" style="--i:4" id="days" aria-hidden="true"></div>
+      <p class="sub r" style="--i:5">Almost 9 days of 2026, gone.</p>
+    </section>
+
+    <!-- 4 -->
+    <section class="slide t-blue">
+      <div class="deco stripes" style="left:-50cqw; top:6cqw"></div>
+      <p class="kick r" style="--i:0">What it could have been</p>
+      <h2 class="head r" style="--i:1">Enough time to</h2>
+      <div class="swap r" style="--i:2"><span>run</span><b><span data-n="1400">1,400</span> miles</b></div>
+      <div class="swap r" style="--i:3"><span>or read</span><b><span data-n="35">35</span> books</b></div>
+      <p class="sub r" style="--i:4">Same hours. Different year.</p>
+    </section>
+
+    <!-- 5 -->
+    <section class="slide t-violet">
+      <div class="deco rings" style="right:-60cqw; top:-60cqw"></div>
+      <p class="kick r" style="--i:0">Your peak hour</p>
+      <h2 class="head r" style="--i:1">Your top time was</h2>
+      <p class="big sm r" style="--i:2"><em>11pm</em> to <em>1am</em></p>
+      <div class="r" style="--i:3">
+        <div class="clock" id="clock" aria-hidden="true"></div>
+      </div>
+      <div class="axis note r" style="--i:3"><span>Noon</span><span>6pm</span><span>Midnight</span><span>6am</span><span>Noon</span></div>
+      <p class="sub r" style="--i:4">61% of your hours landed after 10pm.</p>
+    </section>
+
+    <!-- 6 -->
+    <section class="slide t-night">
+      <div class="deco burst" style="left:-80cqw; bottom:-70cqw"></div>
+      <p class="kick r" style="--i:0">The long view</p>
+      <h2 class="head r" style="--i:1">You started <em>9 years ago.</em></h2>
+      <p class="note r" style="--i:2">LIFETIME TOTAL</p>
+      <p class="big mid r" style="--i:2"><span data-n="1900">1,900</span></p>
+      <h2 class="head r" style="--i:3">hours.</h2>
+      <p class="sub r" style="--i:4">That's 79 days.</p>
+    </section>
+
+    <!-- 7 -->
+    <section class="slide t-wine">
+      <div class="deco stripes" style="left:-40cqw; bottom:10cqw"></div>
+      <p class="kick r" style="--i:0">The projection</p>
+      <h2 class="head r" style="--i:1">Keep this pace and by 30 it's</h2>
+      <p class="big r" style="--i:2"><em data-n="150">150</em></p>
+      <h2 class="head r" style="--i:3">days of your life.</h2>
+      <div class="span r" style="--i:4">
+        <div class="span-bar" style="--w:52.7%"><u></u><b></b></div>
+        <div class="span-ends note"><span>79 DAYS SO FAR</span><span>150 BY AGE 30</span></div>
+      </div>
+    </section>
+
+    <!-- 8 -->
+    <section class="slide t-forest">
+      <div class="deco blob" style="right:-30cqw; bottom:-24cqw; opacity:.22"></div>
+      <p class="kick r" style="--i:0">The turn</p>
+      <h2 class="head r" style="--i:1">Then, on 3 June,</h2>
+      <p class="big sm r" style="--i:2">you opened <em>Kanso.</em></p>
+      <p class="sub r" style="--i:4">Here's what happened next.</p>
+    </section>
+
+    <!-- 9 -->
+    <section class="slide t-lime">
+      <div class="deco rings" style="left:-70cqw; top:-70cqw; opacity:.14"></div>
+      <p class="kick r" style="--i:0">Hours a week</p>
+      <p class="big r" style="--i:1; font-size:30cqw">−<span data-n="90">90</span>%</p>
+      <div class="versus r" style="--i:2">
+        <div><i style="--v:100"></i><b>8.7 h</b><span class="note">BEFORE KANSO</span></div>
+        <div><i style="--v:10.5"></i><b>0.9 h</b><span class="note">SINCE 3 JUNE</span></div>
+      </div>
+      <p class="sub r" style="--i:3">190 hours in the first five months. 22 in the six since.</p>
+    </section>
+
+    <!-- 10 -->
+    <section class="slide t-ink" style="--pop:#8cf2bd">
+      <p class="kick r" style="--i:0">Clean days</p>
+      <p class="big r" style="--i:1"><em data-n="155">155</em></p>
+      <h2 class="head r" style="--i:2">clean days in 2026.</h2>
+      <div class="dots r" style="--i:3" id="dots" role="img" aria-label="One dot for each day of 2026. 155 of the 173 days since 3 June are clean."></div>
+      <div class="key note r" style="--i:3"><span><i></i>CLEAN</span><span><i style="background:#ff4f38"></i>WATCHED</span><span><i style="background:rgb(246 241 230 / .2)"></i>BEFORE KANSO</span></div>
+      <p class="sub r" style="--i:4">That's 9 out of every 10 days since you joined.</p>
+    </section>
+
+    <!-- 11 -->
+    <section class="slide t-gold">
+      <div class="deco burst" style="right:-75cqw; top:-40cqw; opacity:.22"></div>
+      <p class="kick r" style="--i:0">Longest streak</p>
+      <p class="big r" style="--i:1"><span data-n="41">41</span></p>
+      <h2 class="head r" style="--i:2">days in a row. Your longest ever.</h2>
+      <p class="pill r" style="--i:3">Rank reached: Monk <span lang="ja">僧</span></p>
+      <p class="sub r" style="--i:4">You're on 33 right now. Six fresh starts got you here.</p>
+    </section>
+
+    <!-- 12 -->
+    <section class="slide t-teal">
+      <div class="deco rings" style="left:-50cqw; bottom:-70cqw; opacity:.18"></div>
+      <p class="kick r" style="--i:0">Confidence</p>
+      <h2 class="head r" style="--i:1">Your confidence went from</h2>
+      <p class="fromto r" style="--i:2"><s>3.1</s><span>→</span><b class="big mid" style="margin:0"><em data-n="7.4" data-dec="1">7.4</em></b></p>
+      <svg class="line r" style="--i:3" viewBox="0 0 300 130" data-line="3.1,3.8,4.9,5.6,6.7,7.4" aria-hidden="true"></svg>
+      <p class="sub r" style="--i:4">Out of 10, from your weekly check-ins. Up 139%.</p>
+    </section>
+
+    <!-- 13 -->
+    <section class="slide t-plum">
+      <div class="deco blob" style="right:-40cqw; top:-26cqw; opacity:.2"></div>
+      <p class="kick r" style="--i:0">Sex</p>
+      <h2 class="head r" style="--i:1">How you rated real sex went from</h2>
+      <p class="fromto r" style="--i:2"><s>4.0</s><span>→</span><b class="big mid" style="margin:0"><em data-n="7.8" data-dec="1">7.8</em></b></p>
+      <svg class="line r" style="--i:3" viewBox="0 0 300 130" data-line="4.0,4.2,5.1,6.0,7.1,7.8" aria-hidden="true"></svg>
+      <p class="sub r" style="--i:4">Up 95%. Less screen, more of the real thing.</p>
+    </section>
+
+    <!-- 14 -->
+    <section class="slide t-cream" style="--pop:#0c3327">
+      <p class="kick r" style="--i:0">The small print</p>
+      <h2 class="head r" style="--i:1">A few more from your year.</h2>
+      <ul class="grid">
+        <li class="r" style="--i:2"><b data-n="86">86</b><span>urges ridden out</span></li>
+        <li class="r" style="--i:3"><b data-n="64">64</b><span>sits, 14 hours of stillness</span></li>
+        <li class="r" style="--i:4"><b data-n="38">38</b><span>journal entries</span></li>
+        <li class="r" style="--i:5"><b class="word">Rainfall</b><span>your top sound</span></li>
+        <li class="r" style="--i:6"><b class="word">October</b><span>best month, 28 clean days</span></li>
+        <li class="r" style="--i:7"><b data-n="6">6</b><span>fresh starts, zero quits</span></li>
+      </ul>
+    </section>
+
+    <!-- 15 -->
+    <section class="slide t-ink" data-last>
+      <div class="deco burst" style="left:-25cqw; top:-95cqw; opacity:.2"></div>
+      <p class="kick r" style="--i:0">My 2026 Unwrapped</p>
+      <div class="recap r" style="--i:1">
+        <p class="big mid" style="margin:0"><span data-n="193">193</span></p>
+        <h2 class="head" style="font-size:6.6cqw">hours taken back since June. That's 8 days of your life.</h2>
+        <ul>
+          <li><span>Clean days</span><b>155</b></li>
+          <li><span>Longest streak</span><b>41 days</b></li>
+          <li><span>Confidence</span><b>+139%</b></li>
+          <li><span>Sex</span><b>+95%</b></li>
+          <li><span>Rank</span><b>Monk <span lang="ja">僧</span></b></li>
+        </ul>
+      </div>
+      <div class="acts r" style="--i:2">
+        <button class="line-btn" type="button" id="replay">Replay</button>
+        <a class="solid" href="index.html#journey">Back to Kanso</a>
+      </div>
+    </section>
+
+    <button class="tap prev" type="button" id="prev" aria-label="Previous"></button>
+    <button class="tap next" type="button" id="next" aria-label="Next"></button>
+  </main>
+
+  <script>
+  (() => {
+    'use strict';
+    /* Everything shown is sample data, written into the slides above and the three sets below. */
+    const HOURS = [100, 62, 30, 12, 5, 3, 2, 3, 5, 6, 5, 6, 7, 8, 7, 6, 7, 9, 12, 17, 24, 36, 52, 78];   // share of time by hour of day, 0 = midnight
+    const JOINED = 154, TODAY = 326, YEAR = 365;                                                       // day of 2026: 3 June, 22 November
+    const STREAKS = [8, 14, 11, 26, 41, 22, 33], SLIP = 3;                                             // clean runs since joining, three watched days between each
+
+    const $ = (id) => document.getElementById(id);
+    const el = (tag, cls) => { const n = document.createElement(tag); if (cls) n.className = cls; return n; };
+    const phone = $('phone'), slides = [...document.querySelectorAll('.slide')];
+    const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* Nine day-blocks: eight full and most of a ninth */
+    for (let n = 0; n < 9; n++) {
+      const box = el('i'), fill = el('b');
+      fill.style.setProperty('--n', n);
+      if (n === 8) fill.style.setProperty('--w', '80%');
+      box.append(fill); $('days').append(box);
+    }
+    /* Hours of the day, noon to noon so the late-night peak sits in the middle */
+    for (let n = 0; n < 24; n++) {
+      const hour = (n + 12) % 24, bar = el('i', hour === 23 || hour === 0 ? 'peak' : '');
+      bar.style.setProperty('--v', HOURS[hour]); bar.style.setProperty('--n', n);
+      $('clock').append(bar);
+    }
+    /* The year in dots */
+    {
+      const kind = new Array(YEAR + 1).fill('');   // '' before Kanso, c clean, w watched, f still to come
+      let day = JOINED;
+      STREAKS.forEach((run, n) => {
+        for (let k = 0; k < run; k++) kind[day++] = 'c';
+        if (n < STREAKS.length - 1) for (let k = 0; k < SLIP; k++) kind[day++] = 'w';
+      });
+      for (let d = TODAY + 1; d <= YEAR; d++) kind[d] = 'f';
+      let seen = 0;
+      for (let d = 1; d <= YEAR; d++) {
+        const dot = el('i', kind[d]);
+        if (kind[d] === 'c') dot.style.setProperty('--n', seen++);
+        $('dots').append(dot);
+      }
+    }
+    /* Rising lines: six monthly points on a 0–10 scale */
+    const NS = 'http://www.w3.org/2000/svg', MONTHS = ['JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV'];
+    document.querySelectorAll('[data-line]').forEach((svg) => {
+      const vals = svg.dataset.line.split(',').map(Number);
+      const pts = vals.map((v, n) => [14 + n * (272 / (vals.length - 1)), 104 - (v / 10) * 96]);
+      const d = pts.map((p, n) => `${n ? 'L' : 'M'}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join('');
+      const add = (tag, attrs) => { const n = document.createElementNS(NS, tag); for (const k in attrs) n.setAttribute(k, attrs[k]); svg.append(n); return n; };
+      add('path', { class: 'a', d: `${d}L286 108L14 108Z` });
+      add('path', { class: 'l', d, pathLength: 1 });
+      pts.forEach((p, n) => {
+        add('circle', { cx: p[0], cy: p[1], r: n === pts.length - 1 ? 7 : 4.5 }).style.setProperty('--n', n);
+        add('text', { x: p[0], y: 126, 'text-anchor': 'middle' }).textContent = MONTHS[n];
+      });
+    });
+
+    /* Count a number up when its slide comes on */
+    const fmt = (v, dec) => v.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+    function countUp(slide) {
+      slide.querySelectorAll('[data-n]').forEach((node) => {
+        const to = Number(node.dataset.n), dec = Number(node.dataset.dec || 0);
+        cancelAnimationFrame(node.raf);
+        if (calm) { node.textContent = fmt(to, dec); return; }
+        const holder = node.closest('.r'), wait = holder ? (Number(holder.style.getPropertyValue('--i')) || 0) * 220 + 250 : 0;
+        const t0 = performance.now() + wait, ms = 1100;
+        node.textContent = fmt(0, dec);
+        const step = (now) => {
+          const p = Math.min(1, Math.max(0, (now - t0) / ms)), eased = 1 - (1 - p) ** 3;
+          node.textContent = fmt(to * eased, dec);
+          if (p < 1) node.raf = requestAnimationFrame(step);
+        };
+        node.raf = requestAnimationFrame(step);
+      });
+    }
+
+    /* Moving through the story */
+    const segs = slides.map(() => { const seg = el('i'); seg.append(el('b')); $('segs').append(seg); return seg; });
+    let at = -1;
+    function go(n) {
+      n = Math.max(0, Math.min(slides.length - 1, n));
+      if (n === at) return;
+      at = n;
+      slides.forEach((s, i) => { s.classList.toggle('is-on', i === n); s.setAttribute('aria-hidden', String(i !== n)); });
+      segs.forEach((seg, i) => {
+        seg.className = '';
+        void seg.offsetWidth;   // restart the bar's animation
+        seg.className = i < n ? 'done' : i === n ? 'now' : '';
+      });
+      phone.style.setProperty('--chrome', getComputedStyle(slides[n]).getPropertyValue('--fg'));   // top row takes the slide's text colour
+      countUp(slides[n]);
+    }
+    // A bar that finishes moves the story on, except on the last card
+    $('segs').addEventListener('animationend', () => { if (!('last' in slides[at].dataset)) go(at + 1); });
+
+    // Tap to move, hold to pause
+    let downAt = 0;
+    const press = () => { downAt = performance.now(); phone.classList.add('is-held'); };
+    const lift = (dir) => {
+      phone.classList.remove('is-held');
+      if (downAt && performance.now() - downAt < 280) go(at + dir);
+      downAt = 0;
+    };
+    [['prev', -1], ['next', 1]].forEach(([id, dir]) => {
+      const zone = $(id);
+      zone.addEventListener('pointerdown', press);
+      zone.addEventListener('pointerup', () => lift(dir));
+      zone.addEventListener('pointerleave', () => { phone.classList.remove('is-held'); downAt = 0; });
+      zone.addEventListener('pointercancel', () => { phone.classList.remove('is-held'); downAt = 0; });
+      zone.addEventListener('keydown', (e) => { if (e.key === 'Enter') go(at + dir); });
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); go(at + 1); }
+      else if (e.key === 'ArrowLeft') go(at - 1);
+      else if (e.key === 'Escape') location.href = 'index.html#journey';
+    });
+    $('replay').addEventListener('click', () => go(0));
+    document.addEventListener('visibilitychange', () => phone.classList.toggle('is-held', document.hidden));
+
+    go(0);
+  })();
+  </script>
+</body>
+</html>

@@ -462,6 +462,13 @@ button.ring:focus-visible { transform: scale(1.02); }
 .track { height: 6px; border-radius: 999px; background: var(--highest); overflow: hidden; }
 .track i { display: block; height: 100%; border-radius: inherit; background: var(--coral); }
 
+/* Link to the year-in-review story */
+.unwrap { display: flex; align-items: center; justify-content: space-between; gap: var(--md); flex-wrap: wrap; margin-top: var(--md); padding: 22px 28px; border-radius: var(--r2); background: #c9f560; color: #10200a; transition: transform .2s, background .2s; }
+.unwrap:hover { transform: translateY(-2px); background: #d6fa7c; }
+.unwrap-tx { display: grid; gap: 4px; }
+.unwrap-tx b { font: 800 30px/1 var(--sans); letter-spacing: -.04em; }
+.unwrap-go { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 999px; background: #10200a; color: #c9f560; font: 600 13px/18px var(--sans); letter-spacing: .04em; }
+
 /* Sound garden */
 .vol { display: inline-flex; align-items: center; gap: 12px; }
 .vol input { width: 140px; accent-color: var(--sage); cursor: pointer; }
