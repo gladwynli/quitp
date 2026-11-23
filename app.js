@@ -5,6 +5,8 @@
   const CONFIG = {
     name: '',
     storageKey: 'streak:start',
+    /* Every visit opens on this streak and nothing is saved. Set to null to track a real, saved streak. */
+    demoStart: { days: 1, hours: 5 },
     whyKey: 'streak:why',
   };
 
@@ -37,7 +39,7 @@
     startNow: $('startNow'), startEarlier: $('startEarlier'),
     earlierForm: $('earlierForm'), earlierInput: $('earlierInput'), setupHint: $('setupHint'),
     whyInput: $('whyInput'),
-    panic: $('panic'), panicScreen: $('panicScreen'),
+    panic: $('panic'), reset: $('reset'), panicScreen: $('panicScreen'),
     panicIntro: $('panicIntro'), panicBreathe: $('panicBreathe'), panicDone: $('panicDone'),
     panicStreak: $('panicStreak'), panicWhy: $('panicWhy'), panicKept: $('panicKept'),
     tide: $('tide'), breathLabel: $('breathLabel'), panicTimer: $('panicTimer'),
@@ -385,7 +387,7 @@
 
   function setStart(ms) {
     state.start = ms;
-    store.set(ms);
+    if (!CONFIG.demoStart) store.set(ms);
     if (location.search) history.replaceState(null, '', location.pathname); // leave preview mode
     showCount();
   }
@@ -544,6 +546,11 @@
   }
 
   el.panic.addEventListener('click', openPanic);
+
+  /* Reset on the main screen: one tap in demo mode, tap twice when a real streak is at stake */
+  const resetNow = () => setStart(Date.now());
+  if (CONFIG.demoStart) el.reset.addEventListener('click', resetNow);
+  else { confirmables.push(el.reset); confirmTwice(el.reset, resetNow); }
   $('panicClose').addEventListener('click', () => el.panicScreen.close());
   $('panicBack').addEventListener('click', () => el.panicScreen.close());
   el.panicScreen.addEventListener('close', () => {
@@ -567,7 +574,9 @@
 
   const fontsReady = document.fonts ? Promise.race([document.fonts.ready, wait(1200)]) : Promise.resolve();
   fontsReady.then(() => {
-    state.start = startFromURL() ?? store.get();
+    const demo = CONFIG.demoStart;
+    state.start = startFromURL()
+      ?? (demo ? Date.now() - (demo.days * DAY + demo.hours * HOUR) : store.get());
     if (state.start == null) showSetup();
     else showCount();
   });

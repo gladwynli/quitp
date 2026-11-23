@@ -408,6 +408,22 @@ input[type="datetime-local"]:focus,
 .panic:active { scale: .97; }
 .panic:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 
+.streak-actions { display: grid; justify-items: center; gap: 12px; }
+.reset {
+  height: 36px;
+  padding: 0 16px;
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  background: none;
+  color: var(--ink-2);
+  font: 500 13.5px/1 var(--sans);
+  cursor: pointer;
+  transition: color .2s ease, background-color .2s ease, border-color .2s ease;
+}
+.reset:hover { color: var(--ink); background: rgb(155 175 215 / .08); }
+.reset[data-armed] { border-color: var(--blue); color: var(--blue-light); }
+.reset:focus-visible { outline: 2px solid var(--blue-light); outline-offset: 3px; }
+
 .panic-screen {
   --settle: 0; /* 0 = alarm red, 1 = back to calm blue (set by app.js) */
   position: fixed;
