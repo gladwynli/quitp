@@ -1,4 +1,4 @@
-/* Kanso. Everything is kept in this browser (localStorage key "kanso:v1"); nothing is sent anywhere. */
+/* QuitP. Everything is kept in this browser (localStorage key "kanso:v1"); nothing is sent anywhere. */
 (() => {
   'use strict';
 
